@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <link rel="stylesheet" href="../node_modules/bootstrap/dist/css/bootstrap.css"/>
+    <link rel="stylesheet" href="../node_modules/bootstrap/dist/css/bootstrap-theme.css"/>
+    <link rel="stylesheet" href="../semantic.css"/>
+    <link rel="stylesheet" href="../visual.css"/>
+    <link rel="stylesheet" href="../markdown.css"/>
+
+    <style type="text/css">
+        .vbox, .hbox {
+            display: -webkit-flex;
+            display: flex;
+        }
+        .vbox {
+            flex-direction: column;
+            -webkit-flex-direction: column;
+        }
+        .hbox {
+            flex-direction: row;
+            -webkit-flex-direction: row;
+        }
+        .grow {
+            flex:1;
+            -webkit-flex: 1;
+        }
+        #post-list, #post-editor, #post-meta, #toolbar, #modeltree {
+            min-width: 20em;
+            padding: 1em;
+            margin: 0;
+            flex:0;
+            -webkit-flex:0;
+        }
+        #post-editor {
+            -webkit-flex:1;
+            flex:1;
+        }
+        .semantic-view.zen {
+            font-size: 200%;
+        }
+        #toolbar {
+            text-align: right;
+        }
+        #post-meta, #toolbar {
+            flex:1;
+            -webkit-flex: 1;
+        }
+        #post-editor textarea {
+            width: 100%;
+        }
+        #modeltree { min-width: 30em; }
+
+        a.with-tooltip {
+            position: relative;
+        }
+        a.with-tooltip b.link-tooltip {
+            display: none;
+        }
+        a.with-tooltip:hover b.link-tooltip {
+            display: block;
+            white-space: nowrap;
+        }
+        b.link-tooltip {
+            border: 1px solid black;
+            position: absolute;
+            bottom: 2em;
+            left: auto;
+            right: auto;
+            background-color: white;
+            padding: 0.5em;
+            border-radius: 0.5em;
+        }
+        .scroll {
+            border: 1px solid green;
+            overflow: scroll;
+        }
+
+        #post-list li {
+            list-style: none;
+            padding-bottom: 1em;
+        }
+
+        #main-content {
+            position: fixed;
+            top:0;
+            bottom:0;
+            left:0;
+            right:0;
+        }
+    </style>
+</head>
+<body>
+<div id="main"></div>
+</body>
+<script src="bundle.js"></script>
+</html>
