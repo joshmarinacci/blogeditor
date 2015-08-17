@@ -1,0 +1,120 @@
+.semantic-view div {
+    margin: 0.5em;
+    padding: 0.5em;
+    position: relative;
+    line-height: 140%;
+    padding-right: 5em;
+}
+
+.semantic-view *:after {
+    position: absolute;
+    font-size: 8pt;
+    padding: 3px 0 0 0;
+    margin:0;
+    top: 0.5rem;
+    right: 1.0rem;
+    text-align: right;
+    font-family: sans-serif;
+    color: #aaa;
+    font-variant: normal;
+}
+
+.semantic-view div.header {
+    font-size: 150%;
+    background-color: #fff0f0;
+}
+
+.semantic-view div.subheader {
+    font-size: 125%;
+    background-color: #fff6f6;
+}
+.semantic-view div.body {
+    color: #444;
+    border: 1px solid #eee;
+    border-width: 0px 0px 1px 0px;
+}
+
+.semantic-view .unordered-list {
+    background: #caedca;
+    color: #444;
+    border: 1px solid darkgreen;
+}
+
+.semantic-view .ordered-list {
+    background: #caedca;
+    color: #444;
+    border: 1px solid darkgreen;
+}
+
+.semantic-view .list-item {
+    border: 1px solid darkgreen;
+}
+
+.semantic-view .block-code {
+    color: #888800;
+    background-color: #fffff0;
+    font-family: monospace;
+    border: 1px solid #dda;
+    padding: 0.5em;
+    white-space: pre;
+}
+
+.semantic-view .block-quote {
+    background-color: #eef;
+    color: black;
+    font-family: serif;
+    font-style: italic;
+    padding: 1em;
+}
+.semantic-view .header:after { content: "header"; }
+.semantic-view .subheader:after { content: "subheader"; }
+.semantic-view .body:after { content: "body"; }
+.semantic-view .block-code:after { content: "code block"; }
+.semantic-view .block-quote:after { content: "block quote"; }
+.semantic-view .unordered-list:after { content: "unordered list"; }
+.semantic-view .ordered-list:after { content: "ordered list"; }
+.semantic-view .list-item:after { content: "item"; }
+
+/* inline styles */
+.semantic-view .strong {
+    color: red;
+    font-weight: bold;
+}
+.semantic-view .emphasis {
+    color: green;
+    font-weight: normal;
+    font-style: italic;
+}
+
+
+.semantic-view .inline-code {
+    font-weight: normal;
+    color: #cccc00;
+    font-family: monospace;
+}
+.semantic-view .link {
+    color: purple;
+    text-decoration: underline;
+}
+
+.semantic-view .subscript {
+    vertical-align: sub;
+    font-size: 0.83em;
+}
+.semantic-view .superscript {
+    vertical-align: super;
+    font-size: 0.83em;
+}
+
+.semantic-view .image {
+    display: inline-block;
+    border: 1px solid green;
+}
+
+.semantic-view .delete {
+    text-decoration: line-through;
+}
+
+.semantic-view img {
+    max-width: 100%;
+}
