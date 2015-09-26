@@ -1,6 +1,6 @@
 {
   "name": "blogeditor",
-  "version": "0.0.1",
+  "version": "0.0.5",
   "scripts": {
     "build-sample": "browserify --transform reactify ./editor/main.jsx -o ./editor/bundle.js --debug --verbose"
   },
@@ -11,7 +11,7 @@
     "node-jsx": "^0.13.3",
     "react": "^0.13.3",
     "reactify": "^1.1.1",
-    "semantic-editor-js": "^0.0.2",
+    "semantic-editor-js": "^0.0.3",
     "tape": "^4.0.0",
     "watchify": "^3.3.0"
   }
