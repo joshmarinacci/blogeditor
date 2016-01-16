@@ -169,17 +169,43 @@ var CleanupDropdown = React.createClass({
         this.setState({open:false})
     },
     raiseBlocks: function() {
+
+        //look for blocks who's parent isn't the root.
+        function recurse(nd, action) {
+            action(nd);
+            if(nd.type == Model.ROOT || nd.type == Model.BLOCK || nd.type == Model.SPAN) {
+                nd.content.forEach(function(ch) {
+                    recurse(ch, action);
+                });
+            }
+        }
         var model = PostDataStore.getModel();
         var toRaise = [];
-        model.getRoot().content.forEach(function(par) {
-            par.content.forEach(function(ch) {
-                if(ch.type == Model.BLOCK) {
-                    console.log("need to raise it up");
-                    toRaise.push(ch);
-                }
-            });
+        recurse(model.getRoot(), function(ch){
+            if(ch.type == Model.BLOCK && ch.getParent() != model.getRoot()) toRaise.push(ch);
         });
         console.log("need to raise up", toRaise.length);
+        function findTopParent(ch) {
+            if(ch.getParent().type == Model.ROOT) {
+                return ch;
+            }
+            return findTopParent(ch.getParent());
+        }
+        toRaise.forEach(function(ch) {
+            var par = findTopParent(ch);
+            var n = par.getIndex();
+            //delete from wherever it is
+            ch.deleteFromParent();
+            //insert after the top parent
+            par.getParent().content.splice(n,0,ch);
+            ch.parent = par.getParent();
+        });
+
+        //remove anything that is empty now
+        deleteEmptyText(model.getRoot());
+        deleteEmptySpans(model.getRoot());
+        deleteEmptyBlocks(model.getRoot());
+
         PostDataStore.getRealEditor().syncDom();
         PostDataStore.getRealEditor().markAsChanged();
         this.setState({open:false})
