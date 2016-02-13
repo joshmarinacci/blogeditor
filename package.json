@@ -11,7 +11,7 @@
     "node-jsx": "^0.13.3",
     "react": "^0.13.3",
     "reactify": "^1.1.1",
-    "semantic-editor-js": "^0.0.5",
+    "semantic-editor-js": "^0.0.7",
     "tape": "^4.0.0",
     "watchify": "^3.3.0"
   }
