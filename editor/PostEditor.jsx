@@ -180,7 +180,7 @@ function domToModel(dom,model,options) {
         return model.makeText(dom.nodeValue);
     }
 }
-domToNewModel = function(dom_root, options) {
+var domToNewModel = function(dom_root, options) {
     if(typeof options == 'undefined') options = {
         style_to_element_map: {}
     };
