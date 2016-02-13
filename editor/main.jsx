@@ -261,10 +261,14 @@ var Toolbar = React.createClass({
     toggleZen: function() {
         this.props.onZen();
     },
+    toggleLink: function() {
+        this.props.onLink();
+    },
     render: function() {
-        return <div className='grow' id="toolbar">
+        return <div className='hbox grow' id="toolbar">
             <BlockDropdown styles={this.state.styles.block} type="block"/>
             <BlockDropdown styles={this.state.styles.inline} type="inline"/>
+            <button className="btn btn-default" onClick={this.toggleLink}>Link</button>
             <CleanupDropdown/>
             <button className="btn btn-default" onClick={this.setModelToPost}>Save</button>
             <button className="btn btn-default" onClick={this.doNewPost}>New</button>
@@ -281,8 +285,32 @@ var LinkModal = React.createClass({
             linkModalShown: false
         }
     },
+    show: function() {
+        this.setState({linkModalShown:true});
+        var editor = PostDataStore.getRealEditor();
+        this.styleInlineLink(null,editor);
+    },
+    styleInlineLink: function(evt, editor) {
+        var range = editor.getSelectionRange();
+        if(range.collapsed) {
+            var span = range.start.mod.getParent();
+            if(span.style == 'link') {
+                this.setState({
+                    targetModel:span,
+                });
+                if(span.meta && span.meta.href) {
+                    this.setState({
+                        targetHref: span.meta.href
+                    })
+                }
+                this.setState({linkModalShown:true});
+            }
+        } else {
+            Keystrokes.styleSelection(evt, editor, 'link');
+            this.setState({linkModalShown:true});
+        }
+    },
     componentDidMount: function() {
-        var self = this;
         var editor = PostDataStore.getRealEditor();
         editor.addAction('split-block',function(e,editor) {
             var range = editor.getSelectionRange();
@@ -300,34 +328,8 @@ var LinkModal = React.createClass({
             }
             Keystrokes.splitLine(e,editor);
         });
-        editor.addKeyBinding("style-inline-link",'cmd-shift-a');
-        editor.addAction("style-inline-link",function(e, editor) {
-            console.log('styling an inline link');
-            Keystrokes.stopKeyboardEvent(e);
-            var sel = window.getSelection();
-            var range = sel.getRangeAt(0);
-            var model = editor.getModel();
-            var mod = Dom.findModelForDom(model,range.startContainer).getParent();
-            if(mod.style == 'link') {
-                console.log("inside of an existing link");
-                var link = "";
-                if(mod.meta && mod.meta.href) {
-                    link = mod.meta.href;
-                }
-                self.setState({
-                    targetModel:mod,
-                    linkModalShown:true,
-                    targetHref:link
-                });
-                //the input isn't rendered yet, so wait 100ms
-                setTimeout(function() {
-                    React.findDOMNode(self.refs.urlInput).focus();
-                },100);
-            } else {
-                console.log("doing my own link");
-                Keystrokes.styleSelection(e,editor,'link');
-            }
-        });
+        editor.addKeyBinding("style-inline-link",'cmd-k');
+        editor.addAction("style-inline-link", this.styleInlineLink.bind(this));
     },
     close: function() {
         this.setState({
@@ -342,16 +344,12 @@ var LinkModal = React.createClass({
             mod.meta = {}
         }
         mod.meta.href = this.state.targetHref;
-        //must propagate this back to the dom
-        //var editor = PostDataStore.getEditor();
-        //var com_dom = Dom.findDomForModel(mod, editor);
-        //Dom.rebuildDomFromModel(mod.getParent(),com_dom.parentElement, editor, editor.ownerDocument);
         PostDataStore.getRealEditor().syncDom();
         this.close();
     },
     updateHref: function() {
         this.setState({
-            targetHref: this.refs.urlInput.getDOMNode().value
+            targetHref: this.refs.urlInput.value
         });
     },
     checkEscape: function(e) {
@@ -398,7 +396,8 @@ var MainView = React.createClass({
         return {
             posts: PostDataStore.getPosts(),
             selected: PostDataStore.getPosts()[0],
-            zen:false
+            zen:false,
+            meta:false
         }
     },
     componentDidMount: function() {
@@ -452,14 +451,29 @@ var MainView = React.createClass({
             zen:!this.state.zen
         })
     },
+    showLink: function() {
+        this.refs.linkModal.show();
+    },
+    toggleMeta: function() {
+        this.setState({
+            meta:!this.state.meta
+        })
+    },
     render: function() {
         return (
             <div>
-                <LinkModal/>
+                <LinkModal ref="linkModal"/>
                 <div id="main-content" className='container-fluid vbox grow'>
-                    <div className='hbox'>
-                        <PostMeta   post={this.state.selected}  zen={this.state.zen}/>
-                        <Toolbar    post={this.state.selected} onZen={this.toggleZen}/>
+                    <div className="hbox">
+                        <div>
+                            <button className="btn btn-default" onClick={this.toggleMeta}>toggle</button>
+                        </div>
+                        <div style={{display:!this.state.meta?"none":"block"}}>
+                            <PostMeta post={this.state.selected} zen={this.state.zen}/>
+                        </div>
+                    </div>
+                    <div className="hbox">
+                        <Toolbar post={this.state.selected} onZen={this.toggleZen} onLink={this.showLink}/>
                     </div>
                     <div className='hbox grow'>
                         <PostList posts={this.state.posts} zen={this.state.zen}/>

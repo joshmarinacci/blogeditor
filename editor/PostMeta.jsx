@@ -110,6 +110,7 @@ var PostMeta = React.createClass({
         }
         return <div id="post-meta"
                 style={{display:this.props.zen?'none':'block'}}
+                    className="hbox"
             >
             <form className='form-horizontal'>
                 <div className='form-group'>
