@@ -17,7 +17,7 @@
     "node-jsx": "^0.13.3",
     "react": "^0.14.6",
     "react-dom": "^0.14.6",
-    "semantic-editor-js": "^0.0.9",
+    "semantic-editor-js": "^0.0.10",
     "tape": "^4.0.0",
     "webpack": "^1.12.11"
   }

@@ -307,8 +307,14 @@ var LinkModal = React.createClass({
             }
         } else {
             Keystrokes.styleSelection(evt, editor, 'link');
-            this.setState({linkModalShown:true});
+            var range = editor.getSelectionRange();
+            var span = range.start.mod.getParent();
+            this.setState({
+                targetModel:span,
+                linkModalShown:true
+            });
         }
+        this.refs.urlInput.focus();
     },
     componentDidMount: function() {
         var editor = PostDataStore.getRealEditor();
