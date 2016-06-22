@@ -1,5 +1,72 @@
 'use strict';
 
+
+/**
+ * Created by josh on 7/25/15.
+ */
+
+
+const styleMap = {
+    'STRIKETHROUGH': {
+        textDecoration: 'line-through',
+    },
+    'ITALIC': {
+        textDecoration: 'line-through'
+    },
+    'LINK': {
+        textDecoration: 'line-through'
+    }
+
+
+};
+
+
+
+var config = {password:"foo"};
+var utils = {
+    BASE_URL: 'http://joshondesign.com:39865',
+    getJSON: function(url,cb) {
+        var url = this.BASE_URL+url;
+        console.log("loading posts from",url);
+        var xml = new XMLHttpRequest();
+        var self = this;
+        xml.onreadystatechange = function(e) {
+            if(this.readyState == 4 && this.status == 200) {
+                cb(xml.response);
+            }
+        };
+        xml.responseType = 'json';
+        xml.open("GET",url);
+        xml.setRequestHeader('jauth',config.password);
+        xml.send();
+    },
+    postJSON: function(url,payload,cb) {
+        var url = this.BASE_URL+url;
+        console.log("POST to",url,payload);
+        var xml = new XMLHttpRequest();
+        var self = this;
+        xml.onreadystatechange = function(e) {
+            if(this.readyState == 4 && this.status == 200) {
+                cb(xml.response);
+            }
+        };
+        xml.responseType = 'json';
+        xml.open("POST",url);
+        xml.setRequestHeader('jauth',config.password);
+        var outstr = JSON.stringify(payload);
+        xml.send(outstr);
+    },
+    toClass:function(def, cond) {
+        var str = def.join(" ");
+        for(var name in cond) {
+            if(cond[name] === true) {
+                str += " " + name
+            }
+        }
+        return str;
+    }
+};
+
 const {
     CompositeDecorator,
     Editor,
@@ -40,21 +107,124 @@ function myKeyBindingFn(e) {
     if (e.keyCode === 66 /* `B` key */ && isCmd(e)) return 'style-bold';
     if (e.keyCode === 73 /* `B` key */ && isCmd(e)) return 'style-italic';
     if (e.keyCode === 67 /* `B` key */ && isCmd(e) && e.shiftKey === true)  return 'style-code';
+    if (e.keyCode === 76 /* `B` key */ && isCmd(e) && e.shiftKey === true)  return 'style-link';
     return getDefaultKeyBinding(e);
+}
+
+function JoshRawToDraftRaw(raw) {
+    //console.log("Raw = ",raw);
+    var blocks = [flatten(raw.content[0],0)];
+    //var blocks = raw.content.map((blk) => {
+    //    console.log("blk = ",blk);
+    //    return flatten(blk);
+    //});
+
+    return {
+        blocks:blocks,
+        entityMap:{}
+    }
+
+}
+
+function arrayFlat(arr) {
+    if(!arr.length) return arr;
+    console.log("array flattening",arr.length);
+    var vals = arr.map(arrayFlat);
+    if(vals.length == 1) return vals[0];
+    return vals;
+}
+function flatten(node,start) {
+    //console.log("flattening " +  node.type + " " + start);
+    if(node.type == 'block') {
+        var children = [];
+        var inlineStyleRanges = [];
+        node.content.forEach((ch) => {
+           var res = flatten(ch,start);
+            console.log("block rs = ",res);
+            if(res.ranges) {
+                inlineStyleRanges = inlineStyleRanges.concat(res.ranges)
+            }
+            children.push(res.text);
+        });
+        //console.log("children = ", children);
+        return {
+            type:'unstyled',
+            text: children.join(""),
+            inlineStyleRanges: inlineStyleRanges
+        }
+    }
+    if(node.type == 'span') {
+        var ranges = [];
+        var children = [];
+        var realstart = start;
+        node.content.forEach((ch) => {
+            var res = flatten(ch,start);
+            //console.log("child res = ", res);
+            start = res.end;
+            if(res.ranges) {
+                ranges = ranges.concat(res.ranges);
+            }
+            children.push(res.text);
+        });
+        //console.log("span children = ", children);
+        if(node.style == 'link') {
+            console.log("link span = ", node);
+            var range = {
+                offset:realstart,
+                length:start-realstart,
+                style: 'LINK'
+            };
+            ranges.push(range);
+        }
+        return {
+            text: children.join(""),
+            end: start,
+            ranges:ranges
+        }
+    }
+    if(node.type == 'text') {
+        return {
+            text: node.text,
+            end: start + node.text.length,
+            length: node.text.length
+        };
+    }
+
+    console.log("SHOULDNT BE HERE")
 }
 
 class MyComponent extends React.Component {
     constructor(props) {
         super(props);
+        const decorator = new CompositeDecorator([
+            {
+                strategy: findLinkEntities,
+                component: Link,
+            }
+        ]);
         const blocks = convertFromRaw(rawContent);
         this.state = {
-            editorState: EditorState.createWithContent(blocks)
+            editorState: EditorState.createWithContent(blocks, decorator)
         };
         this.onChange = (editorState) => this.setState({editorState});
         this.logState = () => {
             const content = this.state.editorState.getCurrentContent();
             console.log(convertToRaw(content));
         };
+
+        //console.log("fetching from the real blog");
+        //utils.getJSON('/posts',function(resp){
+        //    console.log("the response is",resp);
+        //});
+        var blogid = "id_97493558";
+        var self = this;
+        utils.getJSON("/load?id="+blogid,function(post) {
+            //console.log("got a post",post);
+            //var raw = JoshRawToDraftRaw(post.raw);
+            //console.log("raw = ", raw);
+            //var blocks = convertFromRaw(raw);
+            //self.onChange(EditorState.createWithContent(blocks));
+        });
     }
 
     toggleBlockType(blockType) {
@@ -73,6 +243,33 @@ class MyComponent extends React.Component {
                 this.state.editorState,
                 style)
         )
+    }
+    doInlineLink() {
+        console.log("making an inline link");
+        const entityKey = Entity.create('LINK', 'MUTABLE', {url: "http://www.pubnub.com/"});
+        this.onChange(RichUtils.toggleLink(
+            this.state.editorState,
+            this.state.editorState.getSelection(),
+            entityKey
+        ));
+    }
+    doLink(e) {
+        console.log("making a link");
+        const entityKey = Entity.create('LINK', 'MUTABLE', {url: "http://www.pubnub.com/"});
+        console.log("selection = ",this.state.editorState.getSelection());
+        /*
+        const selstate = new SelectionState({
+            anchorKey: blockKey,
+            anchorOffset: 0,
+            focusKey: blockKey,
+            focusOffset: block.getLength(),
+        });
+
+        this.onChange(RichUtils.toggleLink(
+            this.state.editorState,
+            selstate,
+            entityKey
+        ));*/
     }
 
     setH1() {
@@ -98,6 +295,7 @@ class MyComponent extends React.Component {
         if(command === 'style-bold') this.toggleInline('BOLD');
         if(command === 'style-italic') this.toggleInline('ITALIC');
         if(command === 'style-code') this.toggleInline('CODE');
+        if(command === 'style-link') this.doInlineLink();
         return false;
     }
 
@@ -153,7 +351,7 @@ class MyComponent extends React.Component {
                     <button onClick={this.setCodeBlock.bind(this)}>code block</button>
                     <button onClick={this.logState}>UL</button>
                     <button onClick={this.logState}>image</button>
-                    <button onClick={this.logState}>link</button>
+                    <button onClick={this.doLink.bind(this)}>link</button>
                     <button onClick={this.doExport.bind(this)}>export</button>
                     <button onClick={this.logState}>special paste</button>
                 </div>
@@ -165,6 +363,7 @@ class MyComponent extends React.Component {
                         keyBindingFn={myKeyBindingFn}
                         handleKeyCommand={this.handleKeyCommand.bind(this)}
                         blockStyleFn={myBlockStyleFn}
+                        customStyleMap={styleMap}
                         ref="editor"
                     />
                 </div>
@@ -175,7 +374,67 @@ class MyComponent extends React.Component {
             </div>
         );
     }
+
+
 }
+
+function findLinkEntities(contentBlock, callback) {
+    contentBlock.findEntityRanges(
+        (character) => {
+            const entityKey = character.getEntity();
+            return (
+                entityKey !== null &&
+                Entity.get(entityKey).getType() === 'LINK'
+            );
+        },
+        callback
+    );
+}
+
+const Link = (props) => {
+    const {url} = Entity.get(props.entityKey).getData();
+    return (
+        <a href={url} style={styles.link}>
+            {props.children}
+        </a>
+    );
+};
+
+
+const styles = {
+    root: {
+        fontFamily: '\'Georgia\', serif',
+        padding: 20,
+        width: 600,
+    },
+    buttons: {
+        marginBottom: 10,
+    },
+    urlInputContainer: {
+        marginBottom: 10,
+    },
+    urlInput: {
+        fontFamily: '\'Georgia\', serif',
+        marginRight: 10,
+        padding: 3,
+    },
+    editor: {
+        border: '1px solid #ccc',
+        cursor: 'text',
+        minHeight: 80,
+        padding: 10,
+    },
+    button: {
+        marginTop: 10,
+        textAlign: 'center',
+    },
+    link: {
+        color: '#3b5998',
+        textDecoration: 'underline',
+    },
+};
+
+
 ReactDOM.render(
     <MyComponent/>,
     document.getElementById('target')

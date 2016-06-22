@@ -6,19 +6,10 @@
     "build": "webpack --progress --colors"
   },
   "dependencies": {
-    "babel-core": "^6.4.0",
-    "babel-loader": "^6.2.1",
-    "babel-preset-es2015": "^6.3.13",
-    "babel-preset-react": "^6.3.13",
-    "bootstrap": "^3.3.5",
-    "file-loader": "^0.8.5",
-    "jquery": "^2.1.4",
-    "moment": "^2.10.3",
-    "node-jsx": "^0.13.3",
-    "react": "^0.14.6",
-    "react-dom": "^0.14.6",
-    "semantic-editor-js": "^0.0.10",
-    "tape": "^4.0.0",
-    "webpack": "^1.12.11"
+    "babel-core": "^5.8.35",
+    "draft-js": "^0.7.0",
+    "es6-shim": "^0.35.1",
+    "react": "^15.1.0",
+    "react-dom": "^15.1.0"
   }
 }
