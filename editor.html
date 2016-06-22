@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="../node_modules/draft-js/dist/Draft.css" />
+    <link rel="stylesheet" href="RichEditor.css" />
+    <style type="text/css">
+        html, body {
+            font-family: 'Helvetica', sans-serif;
+            font-size: 12pt;
+            margin:0;
+            padding:0;
+        }
+
+        .main {
+            border: 1px solid black;
+            height: 100%;
+        }
+        .toolbar {
+            border: 0px solid darkgray;
+            background-color: lightgray;
+            padding: 0;
+        }
+        .toolbar button {
+            border: 0px solid black;
+            background-color: darkgray;
+            padding: 0.5em;
+            font-size: 100%;
+            margin: 0;
+            border-width: 0px 1px 1px 0px;
+        }
+        .toolbar button:active {
+            background-color: black;
+        }
+
+        .draftjs {
+            border: 0px solid red;
+            margin: 0.5em;
+            height: 400px;
+            width: 100%;
+            font-size: 150%;
+            overflow-y: scroll;
+        }
+
+        .draftjs .body {
+            border: 1px solid green;
+            border-width: 0px 0px 1px 0px;
+            padding: 0.5em;
+        }
+        .draftjs .code-block {
+            border: 1px solid darkgoldenrod;
+            font-family: 'Inconsolata', 'Menlo', 'Consolas', monospace;
+            padding: 1em;
+            background-color: lightgoldenrodyellow;
+        }
+
+        .hbox {
+            display: flex;
+            flex-direction: row;
+            border: 1px solid red;
+        }
+        .vbox {
+            display: flex;
+            flex-direction: column;
+        }
+        .links {
+            min-width: 300px;
+            flex: 0;
+            border: 1px solid green;
+        }
+
+    </style>
+</head>
+<body>
+<div id="target"></div>
+<script src="../node_modules/react/dist/react.js"></script>
+<script src="../node_modules/react-dom/dist/react-dom.js"></script>
+<script src="../node_modules/immutable/dist/immutable.js"></script>
+<script src="../node_modules/es6-shim/es6-shim.js"></script>
+<script src="../node_modules/babel-core/browser.js"></script>
+<script src="../node_modules/draft-js/dist/Draft.js"></script>
+<script src="editor.jsx" type="text/babel"></script>
+</body>
+</html>
