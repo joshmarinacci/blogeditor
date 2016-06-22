@@ -91,8 +91,11 @@ const rawContent = {
 
 function myBlockStyleFn(contentBlock) {
     const type = contentBlock.getType();
-    if (type === 'unstyled') return 'body';
-    if (type === 'code-block') return 'code-block';
+    if (type === 'unstyled')     return 'body';
+    if (type === 'code-block')   return 'code-block';
+    if (type === 'header-one')   return 'header-one';
+    if (type === 'header-two')   return 'header-two';
+    if (type === 'header-three') return 'header-three';
 }
 var isCmd = KeyBindingUtil.hasCommandModifier;
 function myKeyBindingFn(e) {

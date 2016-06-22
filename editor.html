@@ -43,6 +43,8 @@
             overflow-y: scroll;
         }
 
+
+
         .draftjs .body {
             border: 1px solid green;
             border-width: 0px 0px 1px 0px;
@@ -54,6 +56,35 @@
             padding: 1em;
             background-color: lightgoldenrodyellow;
         }
+
+        .draftjs .header-one, .draftjs .header-two, .draftjs .header-three {
+            font-size: 150%;
+            border: 1px solid green;
+            border-width: 0px 0px 1px 0px;
+        }
+        .draftjs .header-one   {  font-size: 150%;     }
+        .draftjs .header-two   {  font-size: 100%;     }
+        .draftjs .header-three {  font-size: 80%;      }
+
+        .draftjs .header-one:after { content: "header";       }
+        .draftjs .body:after       { content: "body";         }
+        .draftjs .header-two:after { content: "sub-header";   }
+        .draftjs .header-three:after { content: "sub-sub-header";   }
+        .draftjs .code-block:after { content: "codeblock";    }
+
+        .draftjs *:after {
+            position: absolute;
+            font-size: 60%;
+            padding: 3px 0 0 0;
+            margin:0;
+            top: 0.5rem;
+            right: 1.0rem;
+            text-align: right;
+            font-family: sans-serif;
+            color: #aaa;
+            font-variant: normal;
+        }
+
 
         .hbox {
             display: flex;
