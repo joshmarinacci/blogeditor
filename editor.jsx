@@ -1,11 +1,5 @@
 'use strict';
 
-
-/**
- * Created by josh on 7/25/15.
- */
-
-
 const styleMap = {
     'STRIKETHROUGH': {
         textDecoration: 'line-through',
@@ -19,8 +13,6 @@ const styleMap = {
 
 
 };
-
-
 
 var config = {password:"foo"};
 var utils = {
@@ -79,6 +71,7 @@ const {
     KeyBindingUtil,
     convertToRaw,
     convertFromRaw,
+    AtomicBlockUtils,
     DraftEditorBlock
     } = Draft;
 
@@ -110,6 +103,23 @@ function myKeyBindingFn(e) {
     if (e.keyCode === 76 /* `B` key */ && isCmd(e) && e.shiftKey === true)  return 'style-link';
     return getDefaultKeyBinding(e);
 }
+
+function mediaBlockRenderer(block) {
+    if (block.getType() === 'atomic') {
+        return {
+            component: Image,
+            editable: false
+        };
+    }
+    return null;
+}
+
+const Image = (props) => {
+    const entity = Entity.get(props.block.getEntityAt(0));
+    const {src} = entity.getData();
+    return <img src={src} style={styles.media} />;
+};
+
 
 function JoshRawToDraftRaw(raw) {
     //console.log("Raw = ",raw);
@@ -288,6 +298,19 @@ class MyComponent extends React.Component {
         this.toggleBlockType('unstyled');
     }
 
+    addMedia() {
+        var type = 'image';
+        //var src = "http://joshondesign.com/images/69312_IMG_3195.JPG";
+        var src = "https://www.packtpub.com/sites/default/files/3144_Three.js%20Cookbook.jpg";
+
+        const entityKey = Entity.create(type, 'IMMUTABLE', {src});
+
+        this.onChange(AtomicBlockUtils.insertAtomicBlock(
+            this.state.editorState,
+            entityKey,
+            ' '
+        ));
+    }
 
 
     handleKeyCommand(command) {
@@ -350,7 +373,7 @@ class MyComponent extends React.Component {
                     <button onClick={this.setBody.bind(this)}>body</button>
                     <button onClick={this.setCodeBlock.bind(this)}>code block</button>
                     <button onClick={this.logState}>UL</button>
-                    <button onClick={this.logState}>image</button>
+                    <button onClick={this.addMedia.bind(this)}>image</button>
                     <button onClick={this.doLink.bind(this)}>link</button>
                     <button onClick={this.doExport.bind(this)}>export</button>
                     <button onClick={this.logState}>special paste</button>
@@ -363,6 +386,7 @@ class MyComponent extends React.Component {
                         keyBindingFn={myKeyBindingFn}
                         handleKeyCommand={this.handleKeyCommand.bind(this)}
                         blockStyleFn={myBlockStyleFn}
+                        blockRendererFn={mediaBlockRenderer}
                         customStyleMap={styleMap}
                         ref="editor"
                     />
