@@ -13,6 +13,7 @@
             padding:0;
         }
 
+
         .main {
             border: 1px solid black;
             height: 100%;
@@ -37,30 +38,34 @@
         .draftjs {
             border: 0px solid red;
             margin: 0.5em;
-            height: 400px;
+            height: 100%;
             width: 100%;
             font-size: 150%;
             overflow-y: scroll;
+            padding-right: 2em;
         }
 
 
 
         .draftjs .body {
-            border: 1px solid green;
+            border: 1px solid lightgray;
             border-width: 0px 0px 1px 0px;
             padding: 0.5em;
+            position: relative;
         }
         .draftjs .code-block {
             border: 1px solid darkgoldenrod;
             font-family: 'Inconsolata', 'Menlo', 'Consolas', monospace;
             padding: 1em;
             background-color: lightgoldenrodyellow;
+            position: relative;
         }
 
         .draftjs .header-one, .draftjs .header-two, .draftjs .header-three {
             font-size: 150%;
-            border: 1px solid green;
-            border-width: 0px 0px 1px 0px;
+            border: 0px solid green;
+            border-width: 0px 0px 0px 0px;
+            position: relative;
         }
         .draftjs .header-one   {  font-size: 150%;     }
         .draftjs .header-two   {  font-size: 100%;     }
@@ -78,7 +83,7 @@
             padding: 3px 0 0 0;
             margin:0;
             top: 0.5rem;
-            right: 1.0rem;
+            right: -2rem;
             text-align: right;
             font-family: sans-serif;
             color: #aaa;

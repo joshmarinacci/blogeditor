@@ -4,11 +4,14 @@ const styleMap = {
     'STRIKETHROUGH': {
         textDecoration: 'line-through',
     },
-    'ITALIC': {
-        textDecoration: 'line-through'
+    'EMPHASIS': {
+        fontStyle: 'italic'
     },
     'LINK': {
-        textDecoration: 'line-through'
+        color: 'red'
+    },
+    'STRONG': {
+        fontWeight: 'bold',
     }
 
 
@@ -126,12 +129,14 @@ const Image = (props) => {
 
 function JoshRawToDraftRaw(raw) {
     //console.log("Raw = ",raw);
-    var blocks = [flatten(raw.content[0],0)];
-    //var blocks = raw.content.map((blk) => {
-    //    console.log("blk = ",blk);
-    //    return flatten(blk);
-    //});
-
+    var start = 0;
+    var blocks = [];
+    for(var i=0; i<raw.content.length; i++) {
+        var chunk = raw.content[i];
+        var blk = flatten(chunk,start);
+        //console.log("blk = ",blk);
+        blocks.push(blk);
+    }
     return {
         blocks:blocks,
         entityMap:{}
@@ -149,19 +154,25 @@ function arrayFlat(arr) {
 function flatten(node,start) {
     //console.log("flattening " +  node.type + " " + start);
     if(node.type == 'block') {
+        //console.log("block is", node);
         var children = [];
         var inlineStyleRanges = [];
         node.content.forEach((ch) => {
            var res = flatten(ch,start);
-            console.log("block rs = ",res);
+            start = res.end;
+            //console.log("block rs = ",start,res);
             if(res.ranges) {
                 inlineStyleRanges = inlineStyleRanges.concat(res.ranges)
             }
             children.push(res.text);
         });
         //console.log("children = ", children);
+        var type = 'unstyled';
+        if(node.style == 'subheader') {
+            type = 'header-two';
+        }
         return {
-            type:'unstyled',
+            type:type,
             text: children.join(""),
             inlineStyleRanges: inlineStyleRanges
         }
@@ -181,11 +192,26 @@ function flatten(node,start) {
         });
         //console.log("span children = ", children);
         if(node.style == 'link') {
-            console.log("link span = ", node);
             var range = {
                 offset:realstart,
                 length:start-realstart,
                 style: 'LINK'
+            };
+            ranges.push(range);
+        }
+        if(node.style == 'strong') {
+            var range = {
+                offset:realstart,
+                length:start-realstart,
+                style: 'STRONG'
+            };
+            ranges.push(range);
+        }
+        if(node.style == 'emphasis') {
+            var range = {
+                offset:realstart,
+                length:start-realstart,
+                style: 'EMPHASIS'
             };
             ranges.push(range);
         }
@@ -233,10 +259,10 @@ class MyComponent extends React.Component {
         var self = this;
         utils.getJSON("/load?id="+blogid,function(post) {
             //console.log("got a post",post);
-            //var raw = JoshRawToDraftRaw(post.raw);
-            //console.log("raw = ", raw);
-            //var blocks = convertFromRaw(raw);
-            //self.onChange(EditorState.createWithContent(blocks));
+            var raw = JoshRawToDraftRaw(post.raw);
+            console.log("raw = ", raw);
+            var blocks = convertFromRaw(raw);
+            self.onChange(EditorState.createWithContent(blocks));
         });
     }
 
