@@ -106,7 +106,7 @@ function myKeyBindingFn(e) {
     if (e.keyCode === 66 /* `B` key */ && isCmd(e)) return 'style-bold';
     if (e.keyCode === 73 /* `B` key */ && isCmd(e)) return 'style-italic';
     if (e.keyCode === 67 /* `B` key */ && isCmd(e) && e.shiftKey === true)  return 'style-code';
-    if (e.keyCode === 76 /* `B` key */ && isCmd(e) && e.shiftKey === true)  return 'style-link';
+    if (e.keyCode === 76 /* `B` key */ && isCmd(e) && e.shiftKey === true)  return 'style-link'; //cmd-shift-L
     return getDefaultKeyBinding(e);
 }
 
@@ -257,12 +257,13 @@ class MyComponent extends React.Component {
         //});
         var blogid = "id_97493558";
         var self = this;
+
         utils.getJSON("/load?id="+blogid,function(post) {
             //console.log("got a post",post);
             var raw = JoshRawToDraftRaw(post.raw);
             console.log("raw = ", raw);
             var blocks = convertFromRaw(raw);
-            self.onChange(EditorState.createWithContent(blocks));
+            self.onChange(EditorState.createWithContent(blocks, decorator));
         });
     }
 
@@ -293,9 +294,11 @@ class MyComponent extends React.Component {
         ));
     }
     doLink(e) {
+        /*
         console.log("making a link");
         const entityKey = Entity.create('LINK', 'MUTABLE', {url: "http://www.pubnub.com/"});
         console.log("selection = ",this.state.editorState.getSelection());
+        */
         /*
         const selstate = new SelectionState({
             anchorKey: blockKey,
@@ -447,7 +450,7 @@ function findLinkEntities(contentBlock, callback) {
 const Link = (props) => {
     const {url} = Entity.get(props.entityKey).getData();
     return (
-        <a href={url} style={styles.link}>
+        <a href={url}>
             {props.children}
         </a>
     );
