@@ -153,24 +153,25 @@ var exporter = {
     },
 
 
-    d2j_block: function(block, entityMap) {
-        var blkout = {
+    d2j_block: function(bin, entityMap) {
+        var bout = {
             type:'block',
-            style:'body',
+            style:'unstyled',
             content:[]
         };
+        if(d2j_block_map[bin.type]) bout.style = d2j_block_map[bin.type];
         var chunk = {
             type:'text',
             text:""
         };
 
         var stack = [];
-        for(var i=0; i<block.text.length; i++) {
-            var ch = block.text[i];
-            var r = styleChange(block,i);
+        for(var i=0; i<bin.text.length; i++) {
+            var ch = bin.text[i];
+            var r = styleChange(bin,i);
             if(r.found) {
                 if(r.start) {
-                    blkout.content.push(chunk);
+                    bout.content.push(chunk);
                     var span = {
                         type:'span',
                         style:'plain',
@@ -188,7 +189,7 @@ var exporter = {
                             span.meta.href = ent.data.url;
                         }
                     }
-                    blkout.content.push(span);
+                    bout.content.push(span);
                     stack.push(span);
                     chunk = {
                         type:'text',
@@ -207,9 +208,8 @@ var exporter = {
             }
         }
 
-        blkout.content.push(chunk);
-        if(d2j_block_map[block.type]) blkout.style = d2j_block_map[block.type];
-        return blkout;
+        bout.content.push(chunk);
+        return bout;
     },
     DraftRawToJoshRaw: function(blob) {
 
