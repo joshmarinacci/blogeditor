@@ -186,10 +186,22 @@ var exporter = {
     d2j_block: function(bin, entityMap) {
         var bout = {
             type:'block',
-            style:'unstyled',
+            style:'body',
             content:[]
         };
         if(d2j_block_map[bin.type]) bout.style = d2j_block_map[bin.type];
+        if(bin.type == 'atomic') {
+            return {
+                type:'block',
+                style:'body',
+                content:[{
+                    type:'span',
+                    style:'image',
+                    content:[],
+                    meta: {src: "http://joshondesign.com/images/69761_SafariScreenSnapz059.png" }
+                }]
+            };
+        }
         var chunk = {
             type:'text',
             text:""
@@ -213,7 +225,6 @@ var exporter = {
                     }
                     if(typeof r.range.key !== 'undefined') {
                         var ent = entityMap[r.range.key];
-                        console.log("ent = ",ent);
                         if(d2j_entity_map[ent.type]) {
                             span.style = d2j_entity_map[ent.type];
                             span.meta.href = ent.data.url;
@@ -246,7 +257,7 @@ var exporter = {
         console.log("doing an export");
         console.log("blob = ",blob);
         var blocks = blob.blocks.map((block) => exporter.d2j_block(block,blob.entityMap));
-        console.log("out = " + JSON.stringify({content:blocks},null,'  '));
+        console.log("out = ",blocks);
         var bkx = {
             type:'root',
             content:blocks
