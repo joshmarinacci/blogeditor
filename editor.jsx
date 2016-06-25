@@ -131,15 +131,16 @@ function JoshRawToDraftRaw(raw) {
     //console.log("Raw = ",raw);
     var start = 0;
     var blocks = [];
+    var entityMap = {};
     for(var i=0; i<raw.content.length; i++) {
         var chunk = raw.content[i];
-        var blk = flatten(chunk,start);
+        var blk = flatten(chunk,start,entityMap);
         //console.log("blk = ",blk);
         blocks.push(blk);
     }
     return {
         blocks:blocks,
-        entityMap:{}
+        entityMap:entityMap
     }
 
 }
@@ -151,18 +152,22 @@ function arrayFlat(arr) {
     if(vals.length == 1) return vals[0];
     return vals;
 }
-function flatten(node,start) {
+function flatten(node,start,entityMap) {
     //console.log("flattening " +  node.type + " " + start);
     if(node.type == 'block') {
         //console.log("block is", node);
         var children = [];
         var inlineStyleRanges = [];
+        var entityRanges = [];
         node.content.forEach((ch) => {
-           var res = flatten(ch,start);
+           var res = flatten(ch,start,entityMap);
             start = res.end;
             //console.log("block rs = ",start,res);
-            if(res.ranges) {
-                inlineStyleRanges = inlineStyleRanges.concat(res.ranges)
+            if(res.inlineStyleRanges) {
+                inlineStyleRanges = inlineStyleRanges.concat(res.inlineStyleRanges)
+            }
+            if(res.entityRanges) {
+                entityRanges = entityRanges.concat(res.entityRanges)
             }
             children.push(res.text);
         });
@@ -174,30 +179,41 @@ function flatten(node,start) {
         return {
             type:type,
             text: children.join(""),
-            inlineStyleRanges: inlineStyleRanges
+            inlineStyleRanges: inlineStyleRanges,
+            entityRanges: entityRanges
         }
     }
     if(node.type == 'span') {
-        var ranges = [];
+        var inlineStyleRanges = [];
+        var entityRanges = [];
         var children = [];
         var realstart = start;
         node.content.forEach((ch) => {
-            var res = flatten(ch,start);
+            var res = flatten(ch,start,entityMap);
             //console.log("child res = ", res);
             start = res.end;
-            if(res.ranges) {
-                ranges = ranges.concat(res.ranges);
+            if(res.inlineStyleRanges) {
+                inlineStyleRanges = inlineStyleRanges.concat(res.inlineStyleRanges);
+            }
+            if(res.entityRanges) {
+                entityRanges = entityRanges.concat(res.entityRanges)
             }
             children.push(res.text);
         });
         //console.log("span children = ", children);
         if(node.style == 'link') {
+            var key = Math.random()+"";
+            entityMap[key] = {
+                data: {url:node.meta.href},
+                mutability:'MUTABLE',
+                type:'LINK'
+            };
             var range = {
                 offset:realstart,
                 length:start-realstart,
-                style: 'LINK'
+                key:key
             };
-            ranges.push(range);
+            entityRanges.push(range);
         }
         if(node.style == 'strong') {
             var range = {
@@ -205,7 +221,7 @@ function flatten(node,start) {
                 length:start-realstart,
                 style: 'STRONG'
             };
-            ranges.push(range);
+            inlineStyleRanges.push(range);
         }
         if(node.style == 'emphasis') {
             var range = {
@@ -213,12 +229,13 @@ function flatten(node,start) {
                 length:start-realstart,
                 style: 'EMPHASIS'
             };
-            ranges.push(range);
+            inlineStyleRanges.push(range);
         }
         return {
             text: children.join(""),
             end: start,
-            ranges:ranges
+            inlineStyleRanges:inlineStyleRanges,
+            entityRanges:entityRanges
         }
     }
     if(node.type == 'text') {
