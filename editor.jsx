@@ -127,24 +127,6 @@ const Image = (props) => {
 };
 
 
-function JoshRawToDraftRaw(raw) {
-    //console.log("Raw = ",raw);
-    var start = 0;
-    var blocks = [];
-    var entityMap = {};
-    for(var i=0; i<raw.content.length; i++) {
-        var chunk = raw.content[i];
-        var blk = flatten(chunk,start,entityMap);
-        //console.log("blk = ",blk);
-        blocks.push(blk);
-    }
-    return {
-        blocks:blocks,
-        entityMap:entityMap
-    }
-
-}
-
 function arrayFlat(arr) {
     if(!arr.length) return arr;
     console.log("array flattening",arr.length);
@@ -300,7 +282,7 @@ class MyComponent extends React.Component {
 
         utils.getJSON("/load?id="+blogid,(post) => {
             console.log("got a post",post);
-            var raw = JoshRawToDraftRaw(post.raw);
+            var raw = exporter.JoshRawToDraftRaw(post.raw);
             console.log("raw = ", raw);
             var blocks = convertFromRaw(raw);
             self.onChange(EditorState.createWithContent(blocks, this.decorator));
@@ -395,133 +377,11 @@ class MyComponent extends React.Component {
     }
 
     doExport() {
-        function styleChange(block,index) {
-            for(var i=0; i<block.entityRanges.length; i++) {
-                var r = block.entityRanges[i];
-                if(r.offset == index) {
-                    return {
-                        found:true,
-                        range:r,
-                        start:true
-                    }
-                }
-                if(r.offset + r.length == index) {
-                    return {
-                        found:true,
-                        range:r,
-                        start:false
-                    }
-                }
-            }
-            for(var i=0; i<block.inlineStyleRanges.length; i++) {
-                var r = block.inlineStyleRanges[i];
-                if(r.offset == index) {
-                    return {
-                        found:true,
-                        range:r,
-                        start:true
-                    }
-                }
-                if(r.offset + r.length == index) {
-                    return {
-                        found:true,
-                        range:r,
-                        start:false
-                    }
-                }
-            }
-
-            return {
-                found:false
-            }
-        }
-
-        console.log("doing an export");
         const content = this.state.editorState.getCurrentContent();
-        var blob = convertToRaw(content);
-        console.log("blob = ",blob);
-        var blocks = blob.blocks.map((block)=>{
-            var txt = block.text;
-            var chunks = [];
-            var last = 0;
-            var cstyle = {};
-            var chunk = {
-                type:'text',
-                text:"",
-            };
-
-            var stack = [];
-            for(var i=0; i<block.text.length; i++) {
-                var ch = block.text[i];
-                //console.log('ch = ', ch);
-
-                var r = styleChange(block,i);
-                if(r.found) {
-                    if(r.start) {
-                        console.log("doing start", r.range);
-                        chunks.push(chunk);
-                        var span = {
-                            type:'span',
-                            style:'plain',
-                            meta:{},
-                            content:[]
-                        };
-                        if(typeof r.range.style !== 'undefined') {
-                            console.log("doing a style change");
-                            if(r.range.style == 'STRONG') {
-                                span.style = 'strong';
-                            }
-                            if(r.range.style == 'EMPHASIS') {
-                                span.style = 'emphasis';
-                            }
-                        }
-                        if(typeof r.range.key !== 'undefined') {
-                            console.log("it's a real entity");
-                            var ent = blob.entityMap[r.range.key];
-                            console.log("ent = ",ent);
-                            if(ent.type == 'LINK') {
-                                span.style = 'link';
-                                span.meta.href = ent.data.url;
-                            }
-                        }
-                        chunks.push(span);
-                        stack.push(span);
-                        chunk = {
-                            type:'text',
-                            text:ch
-                        }
-                    } else {
-                        console.log("doing end", r.range);
-                        var span = stack.pop();
-                        span.content.push(chunk);
-                        chunk = {
-                            type:'text',
-                            text:ch
-                        }
-                    }
-                } else {
-                    chunk.text += ch;
-                }
-            }
-
-            chunks.push(chunk);
-            var blkout = {
-                type:'block',
-                style:'body',
-                content: chunks
-            };
-            if(block.type == 'header-two') {
-                blkout.style = 'subheader';
-            }
-            return blkout;
-        });
-        console.log("out = " + JSON.stringify({content:blocks},null,'  '));
-        var bkx = {
-            type:'root',
-            content:blocks
-        }
-        var raw = JoshRawToDraftRaw(bkx);
-        this.onChange(EditorState.createWithContent(convertFromRaw(raw), this.decorator));
+        var draw = convertToRaw(content);
+        var jraw = exporter.DraftRawToJoshRaw(draw);
+        var draw2 = exporter.JoshRawToDraftRaw(jraw);
+        this.onChange(EditorState.createWithContent(convertFromRaw(draw2), this.decorator));
     }
 
     render() {
