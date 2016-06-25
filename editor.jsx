@@ -176,7 +176,8 @@ class MyComponent extends React.Component {
             console.log("the response is",resp);
         });
         //var blogid = "id_97493558";
-        var blogid = "id_65595712";
+        //var blogid = "id_65595712";
+        var blogid = "9525084e-3239-45f8-812c-a8d3eec75cc7";
         var self = this;
 
         utils.getJSON("/load?id="+blogid,(post) => {

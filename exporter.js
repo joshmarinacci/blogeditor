@@ -7,7 +7,8 @@ var j2d_style_map = {
     'emphasis':'EMPHASIS',
     'inline-code':'code-inline',
     'subheader':'header-two',
-    'block-code':'code-block'
+    'block-code':'code-block',
+    'italic':'EMPHASIS'
 };
 
 var d2j_style_map = {
@@ -70,7 +71,27 @@ var exporter = {
     JoshRawToDraftRaw: function(raw) {
         var entityMap = {};
         var blocks = raw.content.map((chunk)=>{
-            return exporter.flatten(chunk,0,entityMap);
+            var img = null;
+            var ic = function(imgtoadd,blk) {
+                img = imgtoadd;
+            };
+            var retval = exporter.flatten(chunk,0,entityMap, ic);
+            if(img !== null) {
+                var src = img;
+                var key = Math.random()+"";
+                entityMap[key] = {
+                    type:'image',
+                    mutability:'IMMUTABLE',
+                    data: {src:src}
+                };
+                return {
+                    type:'atomic',
+                    inlineStyleRanges:[],
+                    entityRanges:[{offset:0, length: 1, key:key}],
+                    text:" "
+                }
+            }
+            return retval;
         });
         return {
             blocks:blocks,
@@ -78,11 +99,11 @@ var exporter = {
         }
 
     },
-    flatten : function(node,start,entityMap) {
+    flatten : function(node,start,entityMap,ic) {
         //console.log("flattening " +  node.type + " " + start);
-        if(node.type == 'block') return exporter.j2d_block(node,start,entityMap);
-        if(node.type == 'span')  return exporter.j2d_span(node,start,entityMap);
-        if(node.type == 'text')  return exporter.j2d_text(node,start);
+        if(node.type == 'block') return exporter.j2d_block(node,start,entityMap,ic);
+        if(node.type == 'span')  return exporter.j2d_span(node,start,entityMap,ic);
+        if(node.type == 'text')  return exporter.j2d_text(node,start,ic);
         console.log("SHOULDNT BE HERE")
     },
     j2d_text: function(node,start, entityMap) {
@@ -92,7 +113,7 @@ var exporter = {
             length: node.text.length
         };
     },
-    j2d_span: function(node,start,entityMap) {
+    j2d_span: function(node,start,entityMap,ic) {
         var span = {
             inlineStyleRanges :[],
             entityRanges : [],
@@ -101,12 +122,17 @@ var exporter = {
 
         var realstart = start;
         node.content.forEach((ch) => {
-            var res = exporter.flatten(ch,start,entityMap);
+            var res = exporter.flatten(ch,start,entityMap,ic);
             start = res.end;
             if(res.inlineStyleRanges) span.inlineStyleRanges = span.inlineStyleRanges.concat(res.inlineStyleRanges);
             if(res.entityRanges) span.entityRanges = span.entityRanges.concat(res.entityRanges)
             span.text += res.text;
         });
+        if(node.style == 'image') {
+            //var src = node.meta.src;
+            var src = "http://joshondesign.com/images/69761_SafariScreenSnapz059.png";
+            ic(src);
+        }
         if(node.style == 'link') {
             var key = Math.random()+"";
             entityMap[key] = {
@@ -132,7 +158,7 @@ var exporter = {
         span.end = start;
         return span;
     },
-    j2d_block: function(node,start, entityMap) {
+    j2d_block: function(node,start, entityMap,ic) {
         var block = {
             type:'unstyled',
             inlineStyleRanges:[],
@@ -141,7 +167,7 @@ var exporter = {
         };
         //var children = [];
         node.content.forEach((ch) => {
-            var res = exporter.flatten(ch,start,entityMap);
+            var res = exporter.flatten(ch,start,entityMap,ic);
             start = res.end;
             //console.log("block rs = ",start,res);
             if(res.inlineStyleRanges) {
