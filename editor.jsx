@@ -12,6 +12,10 @@ const styleMap = {
     },
     'STRONG': {
         fontWeight: 'bold',
+    },
+    'code-inline': {
+        fontFamily: 'monospace',
+        backgroundColor:'yellow'
     }
 
 
@@ -168,10 +172,11 @@ class MyComponent extends React.Component {
         };
 
         //console.log("fetching from the real blog");
-        //utils.getJSON('/posts',function(resp){
-        //    console.log("the response is",resp);
-        //});
-        var blogid = "id_97493558";
+        utils.getJSON('/posts',function(resp){
+            console.log("the response is",resp);
+        });
+        //var blogid = "id_97493558";
+        var blogid = "id_65595712";
         var self = this;
 
         utils.getJSON("/load?id="+blogid,(post) => {

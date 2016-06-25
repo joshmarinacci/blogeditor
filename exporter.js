@@ -5,20 +5,24 @@
 var j2d_style_map = {
     'strong':'STRONG',
     'emphasis':'EMPHASIS',
-    'subheader':'header-two'
+    'inline-code':'code-inline',
+    'subheader':'header-two',
+    'block-code':'code-block'
 };
 
 var d2j_style_map = {
     'STRONG':'strong',
     'BOLD':'strong',
-    'EMPHASIS':'emphasis'
+    'EMPHASIS':'emphasis',
+    'code-inline':'inline-code'
 };
 
 var d2j_entity_map = {
     'LINK':'link'
 };
 var d2j_block_map = {
-    'header-two':'subheader'
+    'header-two':'subheader',
+    'code-block':'block-code'
 };
 
 function styleChange(block,index) {
