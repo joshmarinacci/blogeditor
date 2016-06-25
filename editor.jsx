@@ -249,18 +249,41 @@ function flatten(node,start,entityMap) {
     console.log("SHOULDNT BE HERE")
 }
 
+
+function findLinkEntities(contentBlock, callback) {
+    contentBlock.findEntityRanges(
+        (character) => {
+            const entityKey = character.getEntity();
+            return (
+                entityKey !== null &&
+                Entity.get(entityKey).getType() === 'LINK'
+            );
+        },
+        callback
+    );
+}
+
+const Link = (props) => {
+    const {url} = Entity.get(props.entityKey).getData();
+    return (
+        <a href={url}>
+            {props.children}
+        </a>
+    );
+};
+
 class MyComponent extends React.Component {
     constructor(props) {
         super(props);
-        const decorator = new CompositeDecorator([
+        const blocks = convertFromRaw(rawContent);
+        this.decorator = new CompositeDecorator([
             {
                 strategy: findLinkEntities,
-                component: Link,
+                component: Link
             }
         ]);
-        const blocks = convertFromRaw(rawContent);
         this.state = {
-            editorState: EditorState.createWithContent(blocks, decorator)
+            editorState: EditorState.createWithContent(blocks, this.decorator)
         };
         this.onChange = (editorState) => this.setState({editorState});
         this.logState = () => {
@@ -275,12 +298,12 @@ class MyComponent extends React.Component {
         var blogid = "id_97493558";
         var self = this;
 
-        utils.getJSON("/load?id="+blogid,function(post) {
-            //console.log("got a post",post);
+        utils.getJSON("/load?id="+blogid,(post) => {
+            console.log("got a post",post);
             var raw = JoshRawToDraftRaw(post.raw);
             console.log("raw = ", raw);
             var blocks = convertFromRaw(raw);
-            self.onChange(EditorState.createWithContent(blocks, decorator));
+            self.onChange(EditorState.createWithContent(blocks, this.decorator));
         });
     }
 
@@ -372,45 +395,135 @@ class MyComponent extends React.Component {
     }
 
     doExport() {
+        function styleChange(block,index) {
+            for(var i=0; i<block.entityRanges.length; i++) {
+                var r = block.entityRanges[i];
+                if(r.offset == index) {
+                    return {
+                        found:true,
+                        range:r,
+                        start:true
+                    }
+                }
+                if(r.offset + r.length == index) {
+                    return {
+                        found:true,
+                        range:r,
+                        start:false
+                    }
+                }
+            }
+            for(var i=0; i<block.inlineStyleRanges.length; i++) {
+                var r = block.inlineStyleRanges[i];
+                if(r.offset == index) {
+                    return {
+                        found:true,
+                        range:r,
+                        start:true
+                    }
+                }
+                if(r.offset + r.length == index) {
+                    return {
+                        found:true,
+                        range:r,
+                        start:false
+                    }
+                }
+            }
+
+            return {
+                found:false
+            }
+        }
+
         console.log("doing an export");
         const content = this.state.editorState.getCurrentContent();
         var blob = convertToRaw(content);
+        console.log("blob = ",blob);
         var blocks = blob.blocks.map((block)=>{
             var txt = block.text;
             var chunks = [];
             var last = 0;
-            block.inlineStyleRanges.forEach(function(range) {
-                var before = txt.substring(last,range.offset);
-                chunks.push({
-                    type:'text',
-                    text:before
-                });
-                var middle = txt.substring(range.offset,range.offset+range.length);
-                chunks.push({
-                    type:'span',
-                    style:'foo',
-                    content:[
-                        {
-                            type:'text',
-                            text:middle
-                        }
-                    ]
-                });
-                console.log("range is",range);
-                last = range.offset + range.length;
-            });
-            chunks.push({
+            var cstyle = {};
+            var chunk = {
                 type:'text',
-                text:txt.substring(last)
-            });
-            return {
+                text:"",
+            };
+
+            var stack = [];
+            for(var i=0; i<block.text.length; i++) {
+                var ch = block.text[i];
+                //console.log('ch = ', ch);
+
+                var r = styleChange(block,i);
+                if(r.found) {
+                    if(r.start) {
+                        console.log("doing start", r.range);
+                        chunks.push(chunk);
+                        var span = {
+                            type:'span',
+                            style:'plain',
+                            meta:{},
+                            content:[]
+                        };
+                        if(typeof r.range.style !== 'undefined') {
+                            console.log("doing a style change");
+                            if(r.range.style == 'STRONG') {
+                                span.style = 'strong';
+                            }
+                            if(r.range.style == 'EMPHASIS') {
+                                span.style = 'emphasis';
+                            }
+                        }
+                        if(typeof r.range.key !== 'undefined') {
+                            console.log("it's a real entity");
+                            var ent = blob.entityMap[r.range.key];
+                            console.log("ent = ",ent);
+                            if(ent.type == 'LINK') {
+                                span.style = 'link';
+                                span.meta.href = ent.data.url;
+                            }
+                        }
+                        chunks.push(span);
+                        stack.push(span);
+                        chunk = {
+                            type:'text',
+                            text:ch
+                        }
+                    } else {
+                        console.log("doing end", r.range);
+                        var span = stack.pop();
+                        span.content.push(chunk);
+                        chunk = {
+                            type:'text',
+                            text:ch
+                        }
+                    }
+                } else {
+                    chunk.text += ch;
+                }
+            }
+
+            chunks.push(chunk);
+            var blkout = {
                 type:'block',
                 style:'body',
                 content: chunks
+            };
+            if(block.type == 'header-two') {
+                blkout.style = 'subheader';
             }
+            return blkout;
         });
         console.log("out = " + JSON.stringify({content:blocks},null,'  '));
+        var bkx = {
+            type:'root',
+            content:blocks
+        }
+        var raw = JoshRawToDraftRaw(bkx);
+        this.onChange(EditorState.createWithContent(convertFromRaw(raw), this.decorator));
     }
+
     render() {
         const {editorState} = this.state;
         return (<div className="main vbox">
@@ -451,27 +564,6 @@ class MyComponent extends React.Component {
 
 }
 
-function findLinkEntities(contentBlock, callback) {
-    contentBlock.findEntityRanges(
-        (character) => {
-            const entityKey = character.getEntity();
-            return (
-                entityKey !== null &&
-                Entity.get(entityKey).getType() === 'LINK'
-            );
-        },
-        callback
-    );
-}
-
-const Link = (props) => {
-    const {url} = Entity.get(props.entityKey).getData();
-    return (
-        <a href={url}>
-            {props.children}
-        </a>
-    );
-};
 
 
 const styles = {
