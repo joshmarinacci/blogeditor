@@ -2,19 +2,18 @@
  * Created by josh on 6/24/16.
  */
 
+var j2d_style_map = {
+    'strong':'STRONG',
+    'emphasis':'EMPHASIS',
+    'subheader':'header-two'
+};
 
 var exporter = {
     JoshRawToDraftRaw: function(raw) {
-        //console.log("Raw = ",raw);
-        var start = 0;
-        var blocks = [];
         var entityMap = {};
-        for(var i=0; i<raw.content.length; i++) {
-            var chunk = raw.content[i];
-            var blk = exporter.flatten(chunk,start,entityMap);
-            //console.log("blk = ",blk);
-            blocks.push(blk);
-        }
+        var blocks = raw.content.map((chunk)=>{
+            return exporter.flatten(chunk,0,entityMap);
+        });
         return {
             blocks:blocks,
             entityMap:entityMap
@@ -23,100 +22,82 @@ var exporter = {
     },
     flatten : function(node,start,entityMap) {
         //console.log("flattening " +  node.type + " " + start);
-        if(node.type == 'block') {
-            //console.log("block is", node);
-            var children = [];
-            var inlineStyleRanges = [];
-            var entityRanges = [];
-            node.content.forEach((ch) => {
-                var res = exporter.flatten(ch,start,entityMap);
-                start = res.end;
-                //console.log("block rs = ",start,res);
-                if(res.inlineStyleRanges) {
-                    inlineStyleRanges = inlineStyleRanges.concat(res.inlineStyleRanges)
-                }
-                if(res.entityRanges) {
-                    entityRanges = entityRanges.concat(res.entityRanges)
-                }
-                children.push(res.text);
-            });
-            //console.log("children = ", children);
-            var type = 'unstyled';
-            if(node.style == 'subheader') {
-                type = 'header-two';
-            }
-            return {
-                type:type,
-                text: children.join(""),
-                inlineStyleRanges: inlineStyleRanges,
-                entityRanges: entityRanges
-            }
-        }
-        if(node.type == 'span') {
-            var inlineStyleRanges = [];
-            var entityRanges = [];
-            var children = [];
-            var realstart = start;
-            node.content.forEach((ch) => {
-                var res = exporter.flatten(ch,start,entityMap);
-                //console.log("child res = ", res);
-                start = res.end;
-                if(res.inlineStyleRanges) {
-                    inlineStyleRanges = inlineStyleRanges.concat(res.inlineStyleRanges);
-                }
-                if(res.entityRanges) {
-                    entityRanges = entityRanges.concat(res.entityRanges)
-                }
-                children.push(res.text);
-            });
-            //console.log("span children = ", children);
-            if(node.style == 'link') {
-                var key = Math.random()+"";
-                entityMap[key] = {
-                    data: {url:node.meta.href},
-                    mutability:'MUTABLE',
-                    type:'LINK'
-                };
-                var range = {
-                    offset:realstart,
-                    length:start-realstart,
-                    key:key
-                };
-                entityRanges.push(range);
-            }
-            if(node.style == 'strong') {
-                var range = {
-                    offset:realstart,
-                    length:start-realstart,
-                    style: 'STRONG'
-                };
-                inlineStyleRanges.push(range);
-            }
-            if(node.style == 'emphasis') {
-                var range = {
-                    offset:realstart,
-                    length:start-realstart,
-                    style: 'EMPHASIS'
-                };
-                inlineStyleRanges.push(range);
-            }
-            return {
-                text: children.join(""),
-                end: start,
-                inlineStyleRanges:inlineStyleRanges,
-                entityRanges:entityRanges
-            }
-        }
-        if(node.type == 'text') {
-            return {
-                text: node.text,
-                end: start + node.text.length,
-                length: node.text.length
-            };
-        }
-
+        if(node.type == 'block') return exporter.j2d_block(node,start,entityMap);
+        if(node.type == 'span')  return exporter.j2d_span(node,start,entityMap);
+        if(node.type == 'text')  return exporter.j2d_text(node,start);
         console.log("SHOULDNT BE HERE")
     },
+    j2d_text: function(node,start, entityMap) {
+        return {
+            text: node.text,
+            end: start + node.text.length,
+            length: node.text.length
+        };
+    },
+    j2d_span: function(node,start,entityMap) {
+        var span = {
+            inlineStyleRanges :[],
+            entityRanges : [],
+            text:""
+        };
+
+        var realstart = start;
+        node.content.forEach((ch) => {
+            var res = exporter.flatten(ch,start,entityMap);
+            start = res.end;
+            if(res.inlineStyleRanges) span.inlineStyleRanges = span.inlineStyleRanges.concat(res.inlineStyleRanges);
+            if(res.entityRanges) span.entityRanges = span.entityRanges.concat(res.entityRanges)
+            span.text += res.text;
+        });
+        if(node.style == 'link') {
+            var key = Math.random()+"";
+            entityMap[key] = {
+                data: {url:node.meta.href},
+                mutability:'MUTABLE',
+                type:'LINK'
+            };
+            var range = {
+                offset:realstart,
+                length:start-realstart,
+                key:key
+            };
+            span.entityRanges.push(range);
+        }
+        if(j2d_style_map[node.style]) {
+            var range = {
+                offset:realstart,
+                length:start-realstart,
+                style: j2d_style_map[node.style]
+            };
+            span.inlineStyleRanges.push(range);
+        }
+        span.end = start;
+        return span;
+    },
+    j2d_block: function(node,start, entityMap) {
+        var block = {
+            type:'unstyled',
+            inlineStyleRanges:[],
+            entityRanges:[],
+            text:""
+        };
+        //var children = [];
+        node.content.forEach((ch) => {
+            var res = exporter.flatten(ch,start,entityMap);
+            start = res.end;
+            //console.log("block rs = ",start,res);
+            if(res.inlineStyleRanges) {
+                block.inlineStyleRanges = block.inlineStyleRanges.concat(res.inlineStyleRanges)
+            }
+            if(res.entityRanges) {
+                block.entityRanges = block.entityRanges.concat(res.entityRanges)
+            }
+            block.text += res.text;
+        });
+        if(j2d_style_map[node.style]) block.type = j2d_style_map[node.style];
+        return block;
+    },
+
 
     DraftRawToJoshRaw: function(blob) {
         function styleChange(block,index) {
