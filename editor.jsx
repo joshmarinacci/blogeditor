@@ -195,7 +195,7 @@ class MyComponent extends React.Component {
         this.onChange(EditorState.createWithContent(cont, this.decorator));
     }
     componentDidMount() {
-        exporter.runTests(this);
+       //exporter.runTests(this);
     }
 
     toggleBlockType(blockType) {
@@ -309,7 +309,7 @@ class MyComponent extends React.Component {
                     <button onClick={this.doExport.bind(this)}>export</button>
                     <button onClick={this.logState}>special paste</button>
                 </div>
-                <div className="hbox">
+                <div className="hbox grow">
                 <div className="draftjs">
                     <Editor
                         editorState={this.state.editorState}
