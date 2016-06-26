@@ -180,13 +180,22 @@ class MyComponent extends React.Component {
         var blogid = "9525084e-3239-45f8-812c-a8d3eec75cc7";
         var self = this;
 
+
         utils.getJSON("/load?id="+blogid,(post) => {
             console.log("got a post",post);
             var raw = exporter.JoshRawToDraftRaw(post.raw);
             console.log("raw = ", raw);
             var blocks = convertFromRaw(raw);
-            self.onChange(EditorState.createWithContent(blocks, this.decorator));
+            this.onChange(EditorState.createWithContent(blocks, this.decorator));
         });
+
+    }
+
+    loadContent(cont) {
+        this.onChange(EditorState.createWithContent(cont, this.decorator));
+    }
+    componentDidMount() {
+        exporter.runTests(this);
     }
 
     toggleBlockType(blockType) {

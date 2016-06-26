@@ -263,7 +263,74 @@ var exporter = {
             content:blocks
         }
         return bkx;
+    },
+    runTests: function(theComp) {
+        this.test1(theComp, () => {
+            this.test2(theComp);
+        });
+    },
+
+    test1: function(theComp, cb) {
+        var jraw1 = {
+            type:'root',
+            content:[
+                {
+                    type:'block',
+                    style:'body',
+                    content:[
+                        {
+                            type:'text',
+                            text:'some cool text'
+                        }
+                    ]
+                }
+            ]
+        };
+        this.compare(jraw1, theComp, cb);
+    },
+    test2: function(theComp, cb) {
+        var jraw1 = {
+            type:'root',
+            content:[
+                {
+                    type:'block',
+                    style:'body',
+                    content:[
+                        {
+                            type:'span',
+                            style:'link',
+                            meta: {
+                                href:'http://www.google.com/'
+                            },
+                            content:[
+                                {
+                                    type:'text',
+                                    text:'some cool text'
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        };
+        this.compare(jraw1, theComp, cb);
+    },
+
+    compare: function(jraw1, theComp, cb) {
+        var diff = DeepDiff.noConflict();
+        var draw1 = exporter.JoshRawToDraftRaw(jraw1);
+        var dcooked1 = convertFromRaw(draw1);
+        theComp.loadContent(dcooked1);
+        setTimeout(function() {
+            const dcooked2 = theComp.state.editorState.getCurrentContent();
+            var draw2 = convertToRaw(dcooked2);
+            var jraw2 = exporter.DraftRawToJoshRaw(draw2);
+            console.log("jraw2 = ", jraw2);
+            console.log("diff = ", diff(jraw1, jraw2));
+            if(cb) cb();
+        },100);
     }
+
 };
 
 

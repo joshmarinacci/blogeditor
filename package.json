@@ -8,6 +8,7 @@
   "dependencies": {
     "babel-core": "^6.10.4",
     "babel-standalone": "^6.10.3",
+    "deep-diff": "^0.3.4",
     "draft-js": "^0.7.0",
     "es6-shim": "^0.35.1",
     "immutable": "^3.8.1",
