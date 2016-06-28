@@ -8,7 +8,9 @@ var j2d_style_map = {
     'inline-code':'code-inline',
     'subheader':'header-two',
     'block-code':'code-block',
-    'italic':'EMPHASIS'
+    'italic':'EMPHASIS',
+    'list-item':'ordered-list-item',
+//    'list-item':'unordered-list-item'
 };
 
 var d2j_style_map = {
@@ -70,11 +72,26 @@ function styleChange(block,index) {
 var exporter = {
     JoshRawToDraftRaw: function(raw) {
         var entityMap = {};
-        var blocks = raw.content.map((chunk)=>{
+        var blocks = [];
+        raw.content.forEach((chunk)=>{
             var img = null;
             var ic = function(imgtoadd,blk) {
                 img = imgtoadd;
             };
+            if(chunk.type == 'block' && chunk.style == 'unordered-list') {
+                j2d_style_map['list-item'] = 'unordered-list-item';
+                chunk.content.forEach((subchunk) => {
+                    blocks.push(exporter.flatten(subchunk,0,entityMap,ic));
+                });
+                return;
+            }
+            if(chunk.type == 'block' && chunk.style == 'ordered-list') {
+                j2d_style_map['list-item'] = 'ordered-list-item';
+                chunk.content.forEach((subchunk) => {
+                    blocks.push(exporter.flatten(subchunk,0,entityMap,ic));
+                });
+                return;
+            }
             var retval = exporter.flatten(chunk,0,entityMap, ic);
             if(img !== null) {
                 var src = img;
@@ -84,14 +101,15 @@ var exporter = {
                     mutability:'IMMUTABLE',
                     data: {src:src}
                 };
-                return {
+                blocks.push({
                     type:'atomic',
                     inlineStyleRanges:[],
                     entityRanges:[{offset:0, length: 1, key:key}],
                     text:" "
-                }
+                });
+                return;
             }
-            return retval;
+            blocks.push(retval);
         });
         return {
             blocks:blocks,

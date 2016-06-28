@@ -228,6 +228,12 @@ class App extends React.Component {
         this.toggleBlockType('unstyled');
     }
 
+    setOrderedList() {
+        this.toggleBlockType("ordered-list-item");
+    }
+    setUnorderedList() {
+        this.toggleBlockType("unordered-list-item");
+    }
     addMedia() {
         var type = 'image';
         //var src = "http://joshondesign.com/images/69312_IMG_3195.JPG";
@@ -270,7 +276,8 @@ class App extends React.Component {
                     <button onClick={this.setH3.bind(this)}>H3</button>
                     <button onClick={this.setBody.bind(this)}>body</button>
                     <button onClick={this.setCodeBlock.bind(this)}>code block</button>
-                    <button onClick={this.logState}>UL</button>
+                    <button onClick={this.setOrderedList.bind(this)}>OL</button>
+                    <button onClick={this.setUnorderedList.bind(this)}>UL</button>
                     <button onClick={this.addMedia.bind(this)}>image</button>
                     <button onClick={this.doLink.bind(this)}>link</button>
                     <button onClick={this.doExport.bind(this)}>export</button>
