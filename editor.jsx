@@ -64,10 +64,10 @@ function myBlockStyleFn(contentBlock) {
 var isCmd = KeyBindingUtil.hasCommandModifier;
 function myKeyBindingFn(e) {
     //console.log("event = ", e.key, e.which, e.keyCode, e.charCode, e.shiftKey, e);
-    if (e.keyCode === 66 /* `B` key */ && isCmd(e)) return 'style-bold';
-    if (e.keyCode === 73 /* `B` key */ && isCmd(e)) return 'style-italic';
-    if (e.keyCode === 67 /* `B` key */ && isCmd(e) && e.shiftKey === true)  return 'style-code';
-    if (e.keyCode === 76 /* `B` key */ && isCmd(e) && e.shiftKey === true)  return 'style-link'; //cmd-shift-L
+    if (e.keyCode === 66 /* `B` key */ && isCmd(e)) return 'style-bold'; // cmd B
+    if (e.keyCode === 73 /* `I` key */ && isCmd(e)) return 'style-italic'; // cmd I
+    if (e.keyCode === 67 /* `C` key */ && isCmd(e) && e.shiftKey === true)  return 'style-code'; //cmd-shift-C
+    if (e.keyCode === 76 /* `L` key */ && isCmd(e) && e.shiftKey === true)  return 'style-link'; //cmd-shift-L
     return getDefaultKeyBinding(e);
 }
 
@@ -124,7 +124,8 @@ class App extends React.Component {
             posts:[],
             post: {
                 title:"foo"
-            }
+            },
+            urlDialogVisible:false
         };
         this.onChange = (editorState) => this.setState({editorState});
         this.logState = () => {
@@ -183,33 +184,33 @@ class App extends React.Component {
         )
     }
     doInlineLink() {
-        console.log("making an inline link");
-        const entityKey = Entity.create('LINK', 'MUTABLE', {url: "http://www.pubnub.com/"});
-        this.onChange(RichUtils.toggleLink(
-            this.state.editorState,
-            this.state.editorState.getSelection(),
-            entityKey
-        ));
+        this.showUrlDialog();
     }
-    doLink(e) {
-        /*
-        console.log("making a link");
-        const entityKey = Entity.create('LINK', 'MUTABLE', {url: "http://www.pubnub.com/"});
-        console.log("selection = ",this.state.editorState.getSelection());
-        */
-        /*
-        const selstate = new SelectionState({
-            anchorKey: blockKey,
-            anchorOffset: 0,
-            focusKey: blockKey,
-            focusOffset: block.getLength(),
-        });
+    showUrlDialog() {
+        this.setState({
+            urlDialogVisible:true
+        })
+    }
+    cancelUrlDialog() {
+        this.setState({urlDialogVisible:false});
+        this.refs.editor.focus();
+    }
+    okayUrlDialog(url) {
+        this.setState({urlDialogVisible:false});
+        this.refs.editor.focus();
+        //have to do this part later, after the focus change, so the selection will be valid
+        setTimeout(()=>{
+            const entityKey = Entity.create('LINK', 'MUTABLE', {url: url});
+            this.onChange(RichUtils.toggleLink(
+                this.state.editorState,
+                this.state.editorState.getSelection(),
+                entityKey
+            ));
+        },100);
+    }
 
-        this.onChange(RichUtils.toggleLink(
-            this.state.editorState,
-            selstate,
-            entityKey
-        ));*/
+    doLink(e) {
+        this.showUrlDialog();
     }
 
     setH1() {
@@ -299,6 +300,11 @@ class App extends React.Component {
                     </div>
                     <MetaEditor post={this.state.post}/>
                 </div>
+                <URLDialog
+                    visible={this.state.urlDialogVisible}
+                    onCancel={this.cancelUrlDialog.bind(this)}
+                    onAction={this.okayUrlDialog.bind(this)}
+                />
             </div>
         );
     }
