@@ -95,7 +95,6 @@
         .hbox {
             display: flex;
             flex-direction: row;
-            border: 1px solid red;
             align-items: stretch;
         }
         .vbox {
@@ -119,6 +118,24 @@
         }
 
 
+        .scroll {
+            overflow: scroll;
+        }
+        .posts-list {
+            border: 1px solid black;
+            border-width: 0 1px 0 0;
+            min-width: 15em;
+            flex: 0;
+        }
+        .posts-list ul {
+            padding:0;
+            margin:0;
+        }
+        .posts-list li {
+            border: 1px solid black;
+            border-width: 0 0 1px 0;
+            padding: 0.25em 0.5em;
+        }
 
     </style>
 </head>
@@ -131,7 +148,9 @@
 <script src="node_modules/es6-shim/es6-shim.js"></script>
 <script src="node_modules/babel-standalone/babel.js"></script>
 <script src="node_modules/draft-js/dist/Draft.js"></script>
+<script src="draftversion/utils.js" type="text/babel"></script>
 <script src="exporter.js" type="text/babel"></script>
+<script src="draftversion/PostsList.jsx" type="text/babel"></script>
 <script src="editor.jsx" type="text/babel"></script>
 </body>
 </html>

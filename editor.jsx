@@ -22,49 +22,6 @@ const styleMap = {
 };
 
 var config = {password:"foo"};
-var utils = {
-    BASE_URL: 'http://joshondesign.com:39865',
-    getJSON: function(url,cb) {
-        var url = this.BASE_URL+url;
-        console.log("loading posts from",url);
-        var xml = new XMLHttpRequest();
-        var self = this;
-        xml.onreadystatechange = function(e) {
-            if(this.readyState == 4 && this.status == 200) {
-                cb(xml.response);
-            }
-        };
-        xml.responseType = 'json';
-        xml.open("GET",url);
-        xml.setRequestHeader('jauth',config.password);
-        xml.send();
-    },
-    postJSON: function(url,payload,cb) {
-        var url = this.BASE_URL+url;
-        console.log("POST to",url,payload);
-        var xml = new XMLHttpRequest();
-        var self = this;
-        xml.onreadystatechange = function(e) {
-            if(this.readyState == 4 && this.status == 200) {
-                cb(xml.response);
-            }
-        };
-        xml.responseType = 'json';
-        xml.open("POST",url);
-        xml.setRequestHeader('jauth',config.password);
-        var outstr = JSON.stringify(payload);
-        xml.send(outstr);
-    },
-    toClass:function(def, cond) {
-        var str = def.join(" ");
-        for(var name in cond) {
-            if(cond[name] === true) {
-                str += " " + name
-            }
-        }
-        return str;
-    }
-};
 
 const {
     CompositeDecorator,
@@ -152,7 +109,7 @@ const Link = (props) => {
     );
 };
 
-class MyComponent extends React.Component {
+class App extends React.Component {
     constructor(props) {
         super(props);
         const blocks = convertFromRaw(rawContent);
@@ -163,7 +120,8 @@ class MyComponent extends React.Component {
             }
         ]);
         this.state = {
-            editorState: EditorState.createWithContent(blocks, this.decorator)
+            editorState: EditorState.createWithContent(blocks, this.decorator),
+            posts:[]
         };
         this.onChange = (editorState) => this.setState({editorState});
         this.logState = () => {
@@ -172,8 +130,10 @@ class MyComponent extends React.Component {
         };
 
         //console.log("fetching from the real blog");
-        utils.getJSON('/posts',function(resp){
-            console.log("the response is",resp);
+        utils.getJSON('/posts',(resp)=>{
+            this.setState({
+                posts:resp
+            })
         });
         //var blogid = "id_97493558";
         //var blogid = "id_65595712";
@@ -310,6 +270,7 @@ class MyComponent extends React.Component {
                     <button onClick={this.logState}>special paste</button>
                 </div>
                 <div className="hbox grow">
+                    <PostsList posts={this.state.posts}/>
                 <div className="draftjs">
                     <Editor
                         editorState={this.state.editorState}
@@ -370,6 +331,6 @@ const styles = {
 
 
 ReactDOM.render(
-    <MyComponent/>,
+    <App/>,
     document.getElementById('target')
 );
