@@ -147,9 +147,7 @@ var exporter = {
             span.text += res.text;
         });
         if(node.style == 'image') {
-            //var src = node.meta.src;
-            var src = "http://joshondesign.com/images/69761_SafariScreenSnapz059.png";
-            ic(src);
+            ic(node.meta.src);
         }
         if(node.style == 'link') {
             var key = Math.random()+"";
