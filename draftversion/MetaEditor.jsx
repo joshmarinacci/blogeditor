@@ -2,6 +2,7 @@ class MetaEditor extends React.Component {
     render() {
         var post = this.props.post;
         return <div className="metadata-editor vbox">
+            <div>id <b>{post.id}</b></div>
             <div>date <b>{post.date}</b></div>
             <div>format <b>{post.format}</b></div>
             <div>slug name <b>{post.slug}</b></div>

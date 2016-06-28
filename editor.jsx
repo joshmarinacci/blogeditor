@@ -140,10 +140,14 @@ class App extends React.Component {
         });
         //var blogid = "id_97493558";
         //var blogid = "id_65595712";
-        var blogid = "9525084e-3239-45f8-812c-a8d3eec75cc7";
-        var self = this;
+        var blogid = "27fa3339-7119-492f-8f1e-3b6ce528310e";
+        this.loadPostById(blogid);
+    }
 
-
+    editPost(post) {
+        this.loadPostById(post.id);
+    }
+    loadPostById(blogid) {
         utils.getJSON("/load?id="+blogid,(post) => {
             console.log("got a post",post);
             this.setState({post:post });
@@ -152,7 +156,6 @@ class App extends React.Component {
             var blocks = convertFromRaw(raw);
             this.onChange(EditorState.createWithContent(blocks, this.decorator));
         });
-
     }
 
     loadContent(cont) {
@@ -274,7 +277,7 @@ class App extends React.Component {
                     <button onClick={this.logState}>special paste</button>
                 </div>
                 <div className="hbox grow">
-                    <PostsList posts={this.state.posts}/>
+                    <PostsList posts={this.state.posts} onSelectPost={this.editPost.bind(this)}/>
                     <div className="draftjs">
                         <Editor
                             editorState={this.state.editorState}
