@@ -121,7 +121,10 @@ class App extends React.Component {
         ]);
         this.state = {
             editorState: EditorState.createWithContent(blocks, this.decorator),
-            posts:[]
+            posts:[],
+            post: {
+                title:"foo"
+            }
         };
         this.onChange = (editorState) => this.setState({editorState});
         this.logState = () => {
@@ -143,6 +146,7 @@ class App extends React.Component {
 
         utils.getJSON("/load?id="+blogid,(post) => {
             console.log("got a post",post);
+            this.setState({post:post });
             var raw = exporter.JoshRawToDraftRaw(post.raw);
             console.log("raw = ", raw);
             var blocks = convertFromRaw(raw);
@@ -271,21 +275,19 @@ class App extends React.Component {
                 </div>
                 <div className="hbox grow">
                     <PostsList posts={this.state.posts}/>
-                <div className="draftjs">
-                    <Editor
-                        editorState={this.state.editorState}
-                        onChange={this.onChange}
-                        keyBindingFn={myKeyBindingFn}
-                        handleKeyCommand={this.handleKeyCommand.bind(this)}
-                        blockStyleFn={myBlockStyleFn}
-                        blockRendererFn={mediaBlockRenderer}
-                        customStyleMap={styleMap}
-                        ref="editor"
-                    />
-                </div>
-                <div className="links">
-                    list of links go here
-                </div>
+                    <div className="draftjs">
+                        <Editor
+                            editorState={this.state.editorState}
+                            onChange={this.onChange}
+                            keyBindingFn={myKeyBindingFn}
+                            handleKeyCommand={this.handleKeyCommand.bind(this)}
+                            blockStyleFn={myBlockStyleFn}
+                            blockRendererFn={mediaBlockRenderer}
+                            customStyleMap={styleMap}
+                            ref="editor"
+                        />
+                    </div>
+                    <MetaEditor post={this.state.post}/>
                 </div>
             </div>
         );
