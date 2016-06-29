@@ -300,6 +300,20 @@ class App extends React.Component {
         this.onChange(EditorState.createWithContent(convertFromRaw(draw2), this.decorator));
     }
 
+    doDiff() {
+        const content = this.state.editorState.getCurrentContent();
+        var draw = convertToRaw(content);
+        var jraw = exporter.DraftRawToJoshRaw(draw);
+        console.log("jraw = ", jraw);
+        utils.getJSON("/load?id="+this.state.post.id,(post) => {
+            console.log("got a post", post);
+            var diff = DeepDiff.noConflict();
+            var jraw2 = post.raw;
+            console.log("diff = ",diff(jraw,jraw2));
+            console.log("jraw2 = ", jraw2);
+        });
+    }
+
     render() {
         const {editorState} = this.state;
         return (<div className="main vbox">
@@ -315,7 +329,7 @@ class App extends React.Component {
                     <button onClick={this.addMedia.bind(this)}>image</button>
                     <button onClick={this.doLink.bind(this)}>link</button>
                     <button onClick={this.doExport.bind(this)}>export</button>
-                    <button onClick={this.logState}>special paste</button>
+                    <button onClick={this.doDiff.bind(this)}>diff</button>
                 </div>
                 <div className="hbox grow">
                     <PostsList posts={this.state.posts} onSelectPost={this.editPost.bind(this)}/>
