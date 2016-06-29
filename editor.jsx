@@ -221,10 +221,22 @@ class App extends React.Component {
         })
 
     }
-    okayImageDialog(){
+    okayImageDialog(src){
         this.setState({
             imageDialogVisible:false
-        })
+        });
+        setTimeout(()=>{
+            var type = 'image';
+            //var src = "http://joshondesign.com/images/69312_IMG_3195.JPG";
+            //var src = "https://www.packtpub.com/sites/default/files/3144_Three.js%20Cookbook.jpg";
+            console.log('adding the src',src);
+            const entityKey = Entity.create(type, 'IMMUTABLE', {src});
+            this.onChange(AtomicBlockUtils.insertAtomicBlock(
+                this.state.editorState,
+                entityKey,
+                ' '
+            ));
+        },100);
     }
 
     doLink(e) {
