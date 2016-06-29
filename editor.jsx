@@ -314,6 +314,20 @@ class App extends React.Component {
         });
     }
 
+    doSave() {
+        const content = this.state.editorState.getCurrentContent();
+        var draw = convertToRaw(content);
+        var jraw = exporter.DraftRawToJoshRaw(draw);
+        console.log("jraw = ", jraw);
+        var post = this.state.post;
+        post.content = null;
+        post.raw = jraw;
+        //post.format = 'jsem';
+        utils.postJSON('/save',post,function(res){
+            console.log("saved with result",res);
+        });
+    }
+
     render() {
         const {editorState} = this.state;
         return (<div className="main vbox">
@@ -330,6 +344,7 @@ class App extends React.Component {
                     <button onClick={this.doLink.bind(this)}>link</button>
                     <button onClick={this.doExport.bind(this)}>export</button>
                     <button onClick={this.doDiff.bind(this)}>diff</button>
+                    <button onClick={this.doSave.bind(this)}>save</button>
                 </div>
                 <div className="hbox grow">
                     <PostsList posts={this.state.posts} onSelectPost={this.editPost.bind(this)}/>
