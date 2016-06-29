@@ -125,7 +125,8 @@ class App extends React.Component {
             post: {
                 title:"foo"
             },
-            urlDialogVisible:false
+            urlDialogVisible:false,
+            imageDialogVisible:false
         };
         this.onChange = (editorState) => this.setState({editorState});
         this.logState = () => {
@@ -209,6 +210,23 @@ class App extends React.Component {
         },100);
     }
 
+    showImageDialog() {
+        this.setState({
+            imageDialogVisible:true
+        })
+    }
+    cancelImageDialog() {
+        this.setState({
+            imageDialogVisible:false
+        })
+
+    }
+    okayImageDialog(){
+        this.setState({
+            imageDialogVisible:false
+        })
+    }
+
     doLink(e) {
         this.showUrlDialog();
     }
@@ -236,6 +254,8 @@ class App extends React.Component {
         this.toggleBlockType("unordered-list-item");
     }
     addMedia() {
+        this.showImageDialog();
+        /*
         var type = 'image';
         //var src = "http://joshondesign.com/images/69312_IMG_3195.JPG";
         var src = "https://www.packtpub.com/sites/default/files/3144_Three.js%20Cookbook.jpg";
@@ -247,6 +267,7 @@ class App extends React.Component {
             entityKey,
             ' '
         ));
+        */
     }
 
 
@@ -304,6 +325,11 @@ class App extends React.Component {
                     visible={this.state.urlDialogVisible}
                     onCancel={this.cancelUrlDialog.bind(this)}
                     onAction={this.okayUrlDialog.bind(this)}
+                />
+                <ImageDialog
+                    visible={this.state.imageDialogVisible}
+                    onCancel={this.cancelImageDialog.bind(this)}
+                    onAction={this.okayImageDialog.bind(this)}
                 />
             </div>
         );
