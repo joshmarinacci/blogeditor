@@ -37,7 +37,8 @@ const {
     convertFromRaw,
     AtomicBlockUtils,
     DraftEditorBlock,
-    DraftEntity
+    DraftEntity,
+    Modifier
     } = Draft;
 
 const rawContent = {
@@ -188,36 +189,34 @@ class App extends React.Component {
     doInlineLink() {
         this.showUrlDialog();
     }
+    getSelectedLinkKey() {
+        var selection = this.state.editorState.getSelection();
+        var content = this.state.editorState.getCurrentContent();
+        var chars = content.getBlockForKey(selection.getAnchorKey())
+            .getCharacterList().slice(selection.getStartOffset(), selection.getEndOffset());
+        //console.log("the chars =",chars);
+        //var ent = null;
+        var entity = null;
+        chars.some((v) => {
+            entity = v.getEntity();
+            //if(!!entity) {
+            //    ent = Entity.get(entity);
+            //}
+        });
+        return entity;
+    }
     showUrlDialog() {
         //find link under the cursor
         console.log('contains link = ',RichUtils.currentBlockContainsLink(this.state.editorState));
         if(RichUtils.currentBlockContainsLink(this.state.editorState)) {
-            console.log("it does contain a link");
-
-
-            var selection = this.state.editorState.getSelection();
-            var content = this.state.editorState.getCurrentContent();
-            var chars = content.getBlockForKey(selection.getAnchorKey())
-                .getCharacterList().slice(selection.getStartOffset(), selection.getEndOffset());
-            console.log("the chars =",chars);
-            var found = false;
-            chars.some((v) => {
-                var entity = v.getEntity();
-                if(!!entity) {
-                    var ent = Entity.get(entity);
-                    console.log("type = ", ent.getType(), "mut = ", ent.getMutability(), "data = ", ent.getData());
-                    var data = ent.getData();
-                    console.log("url = ", data.url);
-                    this.setState({
-                        urlDialogVisible:true,
-                        urlDialogExistingLink:data.url,
-                        urlDialogUpdateExisting:true
-                    });
-                    found = true;
-                }
+            var key = this.getSelectedLinkKey();
+            var url = Entity.get(key).getData().url;
+            this.setState({
+                urlDialogVisible:true,
+                urlDialogExistingLink:url,
+                urlDialogUpdateExisting:true
             });
-            if(found) return;
-
+            return;
         }
         this.setState({
             urlDialogVisible:true,
@@ -235,7 +234,12 @@ class App extends React.Component {
         //have to do this part later, after the focus change, so the selection will be valid
         setTimeout(()=>{
             if(this.state.urlDialogUpdateExisting === true) {
-                console.log("we need to update the existing link isntead of making a new one");
+                var editorState = this.state.editorState;
+                var key = this.getSelectedLinkKey();
+                var ent2 = Entity.replaceData(key,{url:url});
+                var withoutLink = Modifier.applyEntity(editorState.getCurrentContent(), editorState.getSelection(), key);
+                this.onChange(EditorState.push(editorState, withoutLink, 'apply-entity'));
+                console.log("installed new url", url);
                 return;
             }
             const entityKey = Entity.create('LINK', 'MUTABLE', {url: url});
