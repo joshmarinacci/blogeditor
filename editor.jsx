@@ -36,7 +36,8 @@ const {
     convertToRaw,
     convertFromRaw,
     AtomicBlockUtils,
-    DraftEditorBlock
+    DraftEditorBlock,
+    DraftEntity
     } = Draft;
 
 const rawContent = {
@@ -188,9 +189,41 @@ class App extends React.Component {
         this.showUrlDialog();
     }
     showUrlDialog() {
+        //find link under the cursor
+        console.log('contains link = ',RichUtils.currentBlockContainsLink(this.state.editorState));
+        if(RichUtils.currentBlockContainsLink(this.state.editorState)) {
+            console.log("it does contain a link");
+
+
+            var selection = this.state.editorState.getSelection();
+            var content = this.state.editorState.getCurrentContent();
+            var chars = content.getBlockForKey(selection.getAnchorKey())
+                .getCharacterList().slice(selection.getStartOffset(), selection.getEndOffset());
+            console.log("the chars =",chars);
+            var found = false;
+            chars.some((v) => {
+                var entity = v.getEntity();
+                if(!!entity) {
+                    var ent = Entity.get(entity);
+                    console.log("type = ", ent.getType(), "mut = ", ent.getMutability(), "data = ", ent.getData());
+                    var data = ent.getData();
+                    console.log("url = ", data.url);
+                    this.setState({
+                        urlDialogVisible:true,
+                        urlDialogExistingLink:data.url,
+                        urlDialogUpdateExisting:true
+                    });
+                    found = true;
+                }
+            });
+            if(found) return;
+
+        }
         this.setState({
-            urlDialogVisible:true
-        })
+            urlDialogVisible:true,
+            urlDialogExistingLink:null,
+            urlDialogUpdateExisting:false
+        });
     }
     cancelUrlDialog() {
         this.setState({urlDialogVisible:false});
@@ -201,6 +234,10 @@ class App extends React.Component {
         this.refs.editor.focus();
         //have to do this part later, after the focus change, so the selection will be valid
         setTimeout(()=>{
+            if(this.state.urlDialogUpdateExisting === true) {
+                console.log("we need to update the existing link isntead of making a new one");
+                return;
+            }
             const entityKey = Entity.create('LINK', 'MUTABLE', {url: url});
             this.onChange(RichUtils.toggleLink(
                 this.state.editorState,
@@ -364,6 +401,7 @@ class App extends React.Component {
                 </div>
                 <URLDialog
                     visible={this.state.urlDialogVisible}
+                    link={this.state.urlDialogExistingLink}
                     onCancel={this.cancelUrlDialog.bind(this)}
                     onAction={this.okayUrlDialog.bind(this)}
                 />

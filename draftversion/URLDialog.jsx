@@ -1,4 +1,20 @@
 class URLDialog extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            link:""
+        }
+    }
+    componentWillReceiveProps(props) {
+        this.setState({
+            link:props.link
+        });
+    }
+    editLink() {
+        this.setState({
+            link:this.refs.urlText.value
+        })
+    }
     cancel() {
         this.props.onCancel();
     }
@@ -10,7 +26,7 @@ class URLDialog extends React.Component {
             <div className="dialog url-dialog vbox">
                 <h1>Edit URL</h1>
                 <div className="hbox"><b>text</b><input type="text"/></div>
-                <div className="hbox"><b>link</b><input type="text" ref="urlText"/></div>
+                <div className="hbox"><b>link</b><input type="text" ref="urlText" value={this.state.link} onChange={this.editLink.bind(this)}/></div>
                 <div className="hbox">
                     <span className="spacer"></span>
                     <button onClick={this.cancel.bind(this)}>Cancel</button>
