@@ -95,6 +95,10 @@ var exporter = {
             var retval = exporter.flatten(chunk,0,entityMap, ic);
             if(img !== null) {
                 var src = img;
+                if(src.indexOf("http://localhost/")==0) {
+                    src = src.replace("http://localhost/","http://joshondesign.com/");
+                }
+
                 var key = Math.random()+"";
                 entityMap[key] = {
                     type:'image',

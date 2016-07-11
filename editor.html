@@ -121,7 +121,18 @@
 
         .draftjs a::after {
             content: attr(href);
-            border: 0px solid red;
+        }
+
+        .draftjs img {
+            max-width: 100%;
+        }
+
+        .draftjs img::after {
+            content: attr(src);
+        }
+
+        /* style the embedded URLs */
+        .draftjs a::after, .draftjs img::after {
             position: absolute;
             top:auto;
             left:0;
@@ -131,10 +142,6 @@
             padding:0;
             white-space: nowrap;
             line-height: 100%;
-        }
-
-        .draftjs img {
-            max-width: 100%;
         }
 
 
