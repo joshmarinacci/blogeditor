@@ -68,16 +68,24 @@
 
         .draftjs .header-one, .draftjs .header-two, .draftjs .header-three {
             font-size: 150%;
+            border: 1px solid lightgray;
+            border-width: 0px 0px 1px 0px;
         }
         .draftjs .header-one   {  font-size: 150%;     }
         .draftjs .header-two   {  font-size: 100%;     }
         .draftjs .header-three {  font-size: 80%;      }
+        .draftjs .unordered-list-item {
+            border: 1px solid greenyellow;
+        }
 
         .draftjs .header-one:after { content: "header";       }
         .draftjs .body:after       { content: "body";         }
         .draftjs .header-two:after { content: "sub-header";   }
         .draftjs .header-three:after { content: "sub-sub-header";   }
         .draftjs .code-block:after { content: "codeblock";    }
+
+        .draftjs .ordered-list-item:after { content: "OL LI"; }
+        .draftjs .unordered-list-item:after { content: "UL LI"; }
 
         .draftjs *:after {
             position: absolute;
@@ -112,25 +120,21 @@
         }
 
 
-
+        /* styling for links and images */
         .draftjs a {
             border: 1px solid red;
             text-decoration: underline;
             position: relative;
         }
-
         .draftjs a::after {
             content: attr(href);
         }
-
         .draftjs img {
             max-width: 100%;
         }
-
         .draftjs img::after {
             content: attr(src);
         }
-
         /* style the embedded URLs */
         .draftjs a::after, .draftjs img::after {
             position: absolute;
@@ -179,7 +183,6 @@
         .metadata-editor > div {
             padding: 0.25em;
         }
-
         .metadata-editor b {
         }
     </style>

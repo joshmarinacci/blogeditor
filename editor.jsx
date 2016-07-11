@@ -62,6 +62,7 @@ function myBlockStyleFn(contentBlock) {
     if (type === 'header-one')   return 'header-one';
     if (type === 'header-two')   return 'header-two';
     if (type === 'header-three') return 'header-three';
+    if (type === 'unordered-list-item') return 'unordered-list-item';
 }
 var isCmd = KeyBindingUtil.hasCommandModifier;
 function myKeyBindingFn(e) {
@@ -145,7 +146,8 @@ class App extends React.Component {
         //var blogid = "id_97493558";
         //var blogid = "id_65595712";
         //var blogid = "27fa3339-7119-492f-8f1e-3b6ce528310e";
-        var blogid = "9525084e-3239-45f8-812c-a8d3eec75cc7";
+        //var blogid = "9525084e-3239-45f8-812c-a8d3eec75cc7";
+        var blogid = "6dc47cd3-b5d0-44c7-9172-5640fdd225ef";
         this.loadPostById(blogid);
     }
 

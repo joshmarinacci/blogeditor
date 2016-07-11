@@ -9,8 +9,8 @@ var j2d_style_map = {
     'subheader':'header-two',
     'block-code':'code-block',
     'italic':'EMPHASIS',
-    'list-item':'ordered-list-item',
-//    'list-item':'unordered-list-item'
+//    'list-item':'ordered-list-item',
+    'list-item':'unordered-list-item'
 };
 
 var d2j_style_map = {
@@ -25,7 +25,8 @@ var d2j_entity_map = {
 };
 var d2j_block_map = {
     'header-two':'subheader',
-    'code-block':'block-code'
+    'code-block':'block-code',
+    'unordered-list-item':'list-item'
 };
 
 function styleChange(block,index) {
@@ -209,6 +210,7 @@ var exporter = {
             style:'body',
             content:[]
         };
+        console.log("bin type = ", bin.type);
         if(d2j_block_map[bin.type]) bout.style = d2j_block_map[bin.type];
         if(bin.type == 'atomic') {
             let image_entity = entityMap[bin.entityRanges[0].key];
