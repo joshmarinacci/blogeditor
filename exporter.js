@@ -211,6 +211,8 @@ var exporter = {
         };
         if(d2j_block_map[bin.type]) bout.style = d2j_block_map[bin.type];
         if(bin.type == 'atomic') {
+            let image_entity = entityMap[bin.entityRanges[0].key];
+            console.log("saving with image src = ", image_entity.data.src);
             return {
                 type:'block',
                 style:'body',
@@ -218,7 +220,7 @@ var exporter = {
                     type:'span',
                     style:'image',
                     content:[],
-                    meta: {src: "http://joshondesign.com/images/69761_SafariScreenSnapz059.png" }
+                    meta: {src: image_entity.data.src }
                 }]
             };
         }
