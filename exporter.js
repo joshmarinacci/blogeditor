@@ -17,6 +17,7 @@ var d2j_style_map = {
     'STRONG':'strong',
     'BOLD':'strong',
     'EMPHASIS':'emphasis',
+    'ITALIC':'emphasis',
     'code-inline':'inline-code'
 };
 
@@ -156,8 +157,14 @@ var exporter = {
         }
         if(node.style == 'link') {
             var key = Math.random()+"";
+            var href = "";
+            if(node.meta && node.meta.href) {
+                href = node.meta.href;
+            } else {
+                console.log("WARNING. Link node without a meta or href");
+            }
             entityMap[key] = {
-                data: {url:node.meta.href},
+                data: {url:href},
                 mutability:'MUTABLE',
                 type:'LINK'
             };
@@ -210,7 +217,6 @@ var exporter = {
             style:'body',
             content:[]
         };
-        console.log("bin type = ", bin.type);
         if(d2j_block_map[bin.type]) bout.style = d2j_block_map[bin.type];
         if(bin.type == 'atomic') {
             let image_entity = entityMap[bin.entityRanges[0].key];
