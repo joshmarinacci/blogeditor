@@ -10,7 +10,7 @@ class MetaEditor extends React.Component {
             <div>status <b>{post.status}</b></div>
             <div>type <b>{post.type}</b></div>
             <div>title <b>{post.title}</b></div>
-            <div>tags <b>{post.tags}</b></div>
+            <div>tags <b>{post.tags?post.tags.join(", "):""}</b></div>
         </div>
     }
 }

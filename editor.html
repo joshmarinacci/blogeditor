@@ -8,7 +8,7 @@
     <style type="text/css">
         html, body {
             font-family: 'Helvetica', sans-serif;
-            font-size: 12pt;
+            font-size: 10pt;
             margin:0;
             padding:0;
         }
@@ -40,10 +40,10 @@
         .draftjs {
             border: 0px solid red;
             margin: 0.5em;
-            font-size: 150%;
             overflow-y: scroll;
             padding-right: 2em;
             flex: 1;
+            line-height: 200%;
         }
 
 
@@ -61,6 +61,7 @@
         .draftjs .code-block {
             border: 1px solid darkgoldenrod;
             font-family: 'Inconsolata', 'Menlo', 'Consolas', monospace;
+            font-size: 90%;
             padding: 1em;
             background-color: lightgoldenrodyellow;
         }
@@ -115,6 +116,21 @@
         .draftjs a {
             border: 1px solid red;
             text-decoration: underline;
+            position: relative;
+        }
+
+        .draftjs a::after {
+            content: attr(href);
+            border: 0px solid red;
+            position: absolute;
+            top:auto;
+            left:0;
+            right:auto;
+            bottom:-1.3em;
+            margin:0;
+            padding:0;
+            white-space: nowrap;
+            line-height: 100%;
         }
 
         .draftjs img {
