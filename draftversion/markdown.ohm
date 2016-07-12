@@ -1,0 +1,8 @@
+Markdown {
+    doc = para+
+    para = (~"\n\n" body)* "\n\n"
+    body = strong | plainrun
+    strong = "*" plain+ "*"
+    plainrun = plain+
+    plain = (~("*"|"\n\n") any)
+}
