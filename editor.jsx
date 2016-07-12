@@ -130,6 +130,8 @@ class App extends React.Component {
                 title:"foo"
             },
             urlDialogVisible:false,
+            urlDialogExistingText:"",
+            urlDialogExistingLink:"",
             imageDialogVisible:false
         };
         this.onChange = (editorState) => this.setState({editorState});
@@ -196,37 +198,44 @@ class App extends React.Component {
     getSelectedLinkKey() {
         var selection = this.state.editorState.getSelection();
         var content = this.state.editorState.getCurrentContent();
-        var chars = content.getBlockForKey(selection.getAnchorKey())
-            .getCharacterList().slice(selection.getStartOffset(), selection.getEndOffset());
-        //console.log("the chars =",chars);
-        //var ent = null;
-        var entity = null;
+        var block = content.getBlockForKey(selection.getAnchorKey());
+        var chars = block.getCharacterList().slice(selection.getStartOffset(), selection.getEndOffset());
+        var entityKey = null;
         chars.some((v) => {
-            entity = v.getEntity();
-            //if(!!entity) {
-            //    ent = Entity.get(entity);
-            //}
+            entityKey = v.getEntity();
         });
-        return entity;
+        var text = block.getText().slice(selection.getStartOffset(), selection.getEndOffset());
+
+        var ftext = "";
+        block.findEntityRanges(
+            (character) => {
+                const entityKey = character.getEntity();
+                return (entityKey !== null && Entity.get(entityKey).getType() === 'LINK');
+            },
+            (start,end) => {
+                ftext = block.getText().slice(start,end);
+            }
+        );
+        return {key:entityKey, text:ftext, url:Entity.get(entityKey).getData().url};
     }
     showUrlDialog() {
         //find link under the cursor
-        console.log('contains link = ',RichUtils.currentBlockContainsLink(this.state.editorState));
         if(RichUtils.currentBlockContainsLink(this.state.editorState)) {
-            var key = this.getSelectedLinkKey();
-            var url = Entity.get(key).getData().url;
+            var ret = this.getSelectedLinkKey();
             this.setState({
                 urlDialogVisible:true,
-                urlDialogExistingLink:url,
+                urlDialogExistingLink:ret.url,
+                urlDialogExistingText:ret.text,
                 urlDialogUpdateExisting:true
             });
-            return;
+        } else {
+            this.setState({
+                urlDialogVisible: true,
+                urlDialogExistingLink: "",
+                urlDialogExistingText: "",
+                urlDialogUpdateExisting: false
+            });
         }
-        this.setState({
-            urlDialogVisible:true,
-            urlDialogExistingLink:null,
-            urlDialogUpdateExisting:false
-        });
     }
     cancelUrlDialog() {
         this.setState({urlDialogVisible:false});
@@ -410,6 +419,7 @@ class App extends React.Component {
                 <URLDialog
                     visible={this.state.urlDialogVisible}
                     link={this.state.urlDialogExistingLink}
+                    text={this.state.urlDialogExistingText}
                     onCancel={this.cancelUrlDialog.bind(this)}
                     onAction={this.okayUrlDialog.bind(this)}
                 />
