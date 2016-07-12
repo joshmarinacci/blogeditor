@@ -350,8 +350,9 @@ class App extends React.Component {
         const content = this.state.editorState.getCurrentContent();
         var draw = convertToRaw(content);
         var jraw = exporter.DraftRawToJoshRaw(draw);
-        var draw2 = exporter.JoshRawToDraftRaw(jraw);
-        this.onChange(EditorState.createWithContent(convertFromRaw(draw2), this.decorator));
+        console.log("jraw = ", jraw);
+        //var draw2 = exporter.JoshRawToDraftRaw(jraw);
+        //this.onChange(EditorState.createWithContent(convertFromRaw(draw2), this.decorator));
     }
 
     doDiff() {

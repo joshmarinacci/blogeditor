@@ -279,7 +279,14 @@ var exporter = {
             }
         }
 
-        bout.content.push(chunk);
+        if(stack.length > 0) {
+            while(stack.length > 0) {
+                var span = stack.pop();
+                span.content.push(chunk);
+            }
+        } else {
+            bout.content.push(chunk);
+        }
         return bout;
     },
     DraftRawToJoshRaw: function(blob) {
@@ -287,7 +294,6 @@ var exporter = {
         console.log("doing an export");
         console.log("blob = ",blob);
         var blocks = blob.blocks.map((block) => exporter.d2j_block(block,blob.entityMap));
-        console.log("out = ",blocks);
         var bkx = {
             type:'root',
             content:blocks
