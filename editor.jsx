@@ -71,6 +71,7 @@ function myKeyBindingFn(e) {
     if (e.keyCode === 73 /* `I` key */ && isCmd(e)) return 'style-italic'; // cmd I
     if (e.keyCode === 67 /* `C` key */ && isCmd(e) && e.shiftKey === true)  return 'style-code'; //cmd-shift-C
     if (e.keyCode === 76 /* `L` key */ && isCmd(e) && e.shiftKey === true)  return 'style-link'; //cmd-shift-L
+    if (e.keyCode === 75 /* `K` key */ && isCmd(e))  return 'style-link'; //cmd-shift-L
     return getDefaultKeyBinding(e);
 }
 
