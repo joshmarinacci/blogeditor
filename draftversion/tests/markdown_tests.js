@@ -133,5 +133,5 @@ test('link [here](http://website.tld)\n\n');
 
 
 
-//test(test2);
+test(test2);
 
