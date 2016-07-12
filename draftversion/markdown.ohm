@@ -1,6 +1,6 @@
 Markdown {
     doc = para+
-    para = (~"\n\n" body)* "\n\n"
+    para = (~"\n\n" body)* eol eol+
     body = link | image | strong | plainrun
     strong = "*" plain+ "*"
     plainrun = plain+
@@ -9,4 +9,5 @@ Markdown {
     link  = "[" desc "]" "(" url ")"
     desc = (~( "]" ) any)*
     url = (~( ")") any)*
+    eol = "\n"
 }

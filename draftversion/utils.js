@@ -34,6 +34,16 @@ var utils = {
         var outstr = JSON.stringify(payload);
         xml.send(outstr);
     },
+    getTextRelative: function(url, cb) {
+        var xml = new XMLHttpRequest();
+        xml.onreadystatechange = function(e) {
+            if(this.readyState == 4 && this.status == 200) {
+                cb(xml.response);
+            }
+        };
+        xml.open("GET",url);
+        xml.send();
+    },
     toClass:function(def, cond) {
         var str = def.join(" ");
         for(var name in cond) {

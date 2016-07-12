@@ -159,17 +159,24 @@ class App extends React.Component {
         this.loadPostById(post.id);
     }
     loadPostById(blogid) {
+        var self = this;
         utils.getJSON("/load?id="+blogid,(post) => {
             console.log("got a post",post);
             this.setState({post:post });
             var jraw = post.raw;
             if(post.format == 'markdown') {
                 console.log("post is markdown. converting");
-                jraw = MarkdownUtils.parseToJoshRaw(jraw);
+                MarkdownUtils.parseToJoshRaw(jraw, function(doc){
+                    console.log("got back the doc",doc);
+                    var raw = exporter.JoshRawToDraftRaw(doc);
+                    var blocks = convertFromRaw(raw);
+                    self.onChange(EditorState.createWithContent(blocks, self.decorator));
+                });
+            } else {
+                var raw = exporter.JoshRawToDraftRaw(jraw);
+                var blocks = convertFromRaw(raw);
+                this.onChange(EditorState.createWithContent(blocks, this.decorator));
             }
-            var raw = exporter.JoshRawToDraftRaw(jraw);
-            var blocks = convertFromRaw(raw);
-            this.onChange(EditorState.createWithContent(blocks, this.decorator));
         });
     }
 
