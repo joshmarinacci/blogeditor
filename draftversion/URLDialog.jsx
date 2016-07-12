@@ -6,6 +6,11 @@ class URLDialog extends React.Component {
         }
     }
     componentWillReceiveProps(props) {
+        if(props.visible === true) {
+            setTimeout(()=>{
+                this.refs.urlText.focus();
+            },100);
+        }
         this.setState({
             link:props.link
         });
