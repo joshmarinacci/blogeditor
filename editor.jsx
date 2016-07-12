@@ -150,7 +150,8 @@ class App extends React.Component {
         //var blogid = "id_65595712";
         //var blogid = "27fa3339-7119-492f-8f1e-3b6ce528310e";
         //var blogid = "9525084e-3239-45f8-812c-a8d3eec75cc7";
-        var blogid = "6dc47cd3-b5d0-44c7-9172-5640fdd225ef";
+        //var blogid = "6dc47cd3-b5d0-44c7-9172-5640fdd225ef";
+        var blogid = "a7900c5d-f19a-48a4-af23-80727aebcbb1";// beautiful lego 2: dark
         this.loadPostById(blogid);
     }
 
@@ -161,8 +162,12 @@ class App extends React.Component {
         utils.getJSON("/load?id="+blogid,(post) => {
             console.log("got a post",post);
             this.setState({post:post });
-            var raw = exporter.JoshRawToDraftRaw(post.raw);
-            console.log("raw = ", raw);
+            var jraw = post.raw;
+            if(post.format == 'markdown') {
+                console.log("post is markdown. converting");
+                jraw = MarkdownUtils.parseToJoshRaw(jraw);
+            }
+            var raw = exporter.JoshRawToDraftRaw(jraw);
             var blocks = convertFromRaw(raw);
             this.onChange(EditorState.createWithContent(blocks, this.decorator));
         });

@@ -5,6 +5,16 @@
     <title>Title</title>
     <link rel="stylesheet" href="node_modules/draft-js/dist/Draft.css" />
     <!--<link rel="stylesheet" href="RichEditor.css" />-->
+    <script type="text/ohm-js">
+Markdown {
+    doc = para+
+    para = (~"\n\n" body)* "\n\n"
+    body = strong | plainrun
+    strong = "*" plain+ "*"
+    plainrun = plain+
+    plain = (~("*"|"\n\n") any)
+}
+    </script>
     <style type="text/css">
         html, body {
             font-family: 'Helvetica', sans-serif;
@@ -197,7 +207,10 @@
 <script src="node_modules/es6-shim/es6-shim.js"></script>
 <script src="node_modules/babel-standalone/babel.js"></script>
 <script src="node_modules/draft-js/dist/Draft.js"></script>
+
+<script src="node_modules/ohm-js/dist/ohm.js"></script>
 <script src="draftversion/utils.js" type="text/babel"></script>
+<script src="draftversion/MarkdownUtils.js" type="text/babel"></script>
 <script src="exporter.js" type="text/babel"></script>
 <script src="draftversion/PostsList.jsx" type="text/babel"></script>
 <script src="draftversion/URLDialog.jsx" type="text/babel"></script>
