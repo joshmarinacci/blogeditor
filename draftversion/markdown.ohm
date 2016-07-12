@@ -1,8 +1,12 @@
 Markdown {
     doc = para+
     para = (~"\n\n" body)* "\n\n"
-    body = strong | plainrun
+    body = link | image | strong | plainrun
     strong = "*" plain+ "*"
     plainrun = plain+
-    plain = (~("*"|"\n\n") any)
+    plain = (~("[" | "*" | "\n\n") any)
+    image = "!" "[" desc "]" "(" url ")"
+    link  = "[" desc "]" "(" url ")"
+    desc = (~( "]" ) any)*
+    url = (~( ")") any)*
 }

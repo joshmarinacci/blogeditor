@@ -29,6 +29,37 @@ var sem = gram.semantics().addOperation('parse', {
             ]
         }
     },
+    image: function(_1, _2, text, _4, _5, url, _7) {
+        //console.log("got some text:'",text.parse(),"' url = ", url.parse());
+        return {
+            type:'span',
+            style:'image',
+            content:[],
+            meta:{
+                alt:text.parse(),
+                src:url.parse()
+            }
+        }
+    },
+    link: function(_1, text, _3, _4, url, _6) {
+        return {
+            type:'span',
+            style:'link',
+            content:[{
+                type:'text',
+                text:text.parse()
+            }],
+            meta: {
+                href:url.parse()
+            }
+        }
+    },
+    url: function(text) {
+        return text.parse().join("")
+    },
+    desc: function(text) {
+        return text.parse().join("")
+    },
     _terminal: function() {
         return this.interval.contents.toString();
     }
@@ -45,6 +76,18 @@ var sem2 = gram.semantics().addOperation('toHTML', {
     },
     strong: function(_1, text, _3) {
         return "<strong>"+text.toHTML().join("")+"</strong>";
+    },
+    image: function(_1, _2, text, _4, _5, url, _7) {
+        return "<img src='"+url.toHTML()+"' alt='"+text.toHTML()+"'/>";
+    },
+    link: function(_1, text, _3, _4, url, _6) {
+        return "<a href='"+url.toHTML()+"'>"+text.toHTML()+"</a>";
+    },
+    url: function(text) {
+        return text.toHTML().join("")
+    },
+    desc: function(text) {
+        return text.toHTML().join("")
     },
     _terminal: function() {
         return this.interval.contents.toString();
@@ -76,9 +119,19 @@ function test(input) {
 //test('p1\np1\n\np2\n\n');
 //test('p1\np1\n\np2\np2\n\n');
 
+//bold
 //test('*strong*\n\n');
 //test('some *strong* text\n\n');
 //test('some *strong* text\n\n and now some more text\n\n');
 //console.log("test2 = -"+ test2+'-');
+
+//block level image
+test("![text](myimage.png)\n\n");
+
+//inline url
+test('link [here](http://website.tld)\n\n');
+
+
+
 //test(test2);
 
