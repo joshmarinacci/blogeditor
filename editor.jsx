@@ -132,7 +132,8 @@ class App extends React.Component {
             urlDialogVisible:false,
             urlDialogExistingText:"",
             urlDialogExistingLink:"",
-            imageDialogVisible:false
+            imageDialogVisible:false,
+            isNew:false,
         };
         this.onChange = (editorState) => this.setState({editorState});
         this.logState = () => {
@@ -141,11 +142,7 @@ class App extends React.Component {
         };
 
         //console.log("fetching from the real blog");
-        utils.getJSON('/posts',(resp)=>{
-            this.setState({
-                posts:resp
-            })
-        });
+        this.fetchPosts();
         //var blogid = "id_97493558";
         //var blogid = "id_65595712";
         //var blogid = "27fa3339-7119-492f-8f1e-3b6ce528310e";
@@ -153,6 +150,13 @@ class App extends React.Component {
         //var blogid = "6dc47cd3-b5d0-44c7-9172-5640fdd225ef";
         var blogid = "a7900c5d-f19a-48a4-af23-80727aebcbb1";// beautiful lego 2: dark
         this.loadPostById(blogid);
+    }
+    fetchPosts() {
+        utils.getJSON('/posts',(resp)=>{
+            this.setState({
+                posts:resp
+            })
+        });
     }
 
     editPost(post) {
@@ -390,8 +394,70 @@ class App extends React.Component {
         post.content = null;
         post.raw = jraw;
         //post.format = 'jsem';
-        utils.postJSON('/save',post,function(res){
-            console.log("saved with result",res);
+        utils.postJSON('/save', post, (res) => {
+            console.log("saved with result", res);
+            if(this.state.isNew === true) {
+                this.setState({isNew:false});
+                console.log("it's a new doc. must refresh");
+                this.fetchPosts();
+            }
+        });
+    }
+
+    doNew() {
+        console.log("creating a new blog");
+        const rawContent = {
+            blocks: [
+                {
+                    text: (
+                        'new document'
+                    ),
+                    type: 'unstyled'
+                }
+            ],
+            entityMap: {
+
+            }
+        };
+        const blocks = convertFromRaw(rawContent);
+        this.onChange(EditorState.createWithContent(blocks, this.decorator));
+
+        var post = {
+            title:'no title set',
+            slug:'no_slug_set',
+            timestamp: moment().unix(),
+            format : 'jsem',
+            tags : [],
+            status:'draft',
+            id: 'id_'+Math.floor(Math.random()*100*1000*1000)
+        };
+
+        this.setState({
+            isNew:true,
+            post: post
+        })
+    }
+
+    doDelete() {
+        console.log("deleting the current blog",this.state.post);
+        utils.postJSON("/delete?id="+this.state.post.id,{},(res) => {
+            console.log("got the result of deleting",res);
+            this.fetchPosts();
+            const rawContent = {
+                blocks: [
+                    {
+                        text: (
+                            'new document'
+                        ),
+                        type: 'unstyled'
+                    }
+                ],
+                entityMap: {
+
+                }
+            };
+            const blocks = convertFromRaw(rawContent);
+            this.onChange(EditorState.createWithContent(blocks, this.decorator));
         });
     }
 
@@ -412,6 +478,8 @@ class App extends React.Component {
                     <button onClick={this.doExport.bind(this)}>export</button>
                     <button onClick={this.doDiff.bind(this)}>diff</button>
                     <button onClick={this.doSave.bind(this)}>save</button>
+                    <button onClick={this.doNew.bind(this)}>new</button>
+                    <button onClick={this.doDelete.bind(this)}>delete</button>
                 </div>
                 <div className="hbox grow">
                     <PostsList posts={this.state.posts} onSelectPost={this.editPost.bind(this)}/>
