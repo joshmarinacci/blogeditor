@@ -127,7 +127,8 @@ class App extends React.Component {
             editorState: EditorState.createWithContent(blocks, this.decorator),
             posts:[],
             post: {
-                title:"foo"
+                title:"foo",
+                slug:'slug'
             },
             urlDialogVisible:false,
             urlDialogExistingText:"",
@@ -166,6 +167,8 @@ class App extends React.Component {
         var self = this;
         utils.getJSON("/load?id="+blogid,(post) => {
             console.log("got a post",post);
+            //fixup for old blogs that have name instead of slug
+            if(!post.slug) post.slug = post.name;
             this.setState({post:post });
             var jraw = post.raw;
             if(post.format == 'markdown') {
@@ -460,6 +463,20 @@ class App extends React.Component {
             this.onChange(EditorState.createWithContent(blocks, this.decorator));
         });
     }
+    setDraft() {
+        this.state.post.status = 'draft';
+        this.doSave();
+        this.setState({post: this.state.post});
+    }
+    setPublished() {
+        this.state.post.status = 'published';
+        this.doSave();
+        this.setState({post: this.state.post});
+    }
+    metaFieldChanged(field, value) {
+        this.state.post[field] = value;
+        this.setState({post:this.state.post});
+    }
 
     render() {
         const {editorState} = this.state;
@@ -495,7 +512,12 @@ class App extends React.Component {
                             ref="editor"
                         />
                     </div>
-                    <MetaEditor post={this.state.post}/>
+                    <MetaEditor
+                        post={this.state.post}
+                        onSetDraft={this.setDraft.bind(this)}
+                        onSetPublished={this.setPublished.bind(this)}
+                        onFieldChange={this.metaFieldChanged.bind(this)}
+                    />
                 </div>
                 <URLDialog
                     visible={this.state.urlDialogVisible}
@@ -512,7 +534,6 @@ class App extends React.Component {
             </div>
         );
     }
-
 
 }
 
