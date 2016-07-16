@@ -88,7 +88,12 @@ function mediaBlockRenderer(block) {
 const Image = (props) => {
     const entity = Entity.get(props.block.getEntityAt(0));
     const {src} = entity.getData();
-    return <img src={src} style={styles.media} />;
+    return <div className="editable-image">
+        <img src={src} /><br/>
+        <b>{src}</b>
+        <br/>
+        <button onClick={(e) => console.log("clicked on a button",e)}>edit</button>
+    </div>;
 };
 
 function findLinkEntities(contentBlock, callback) {

@@ -89,14 +89,16 @@
 .draftjs a::after {
     content: attr(href);
 }
-.draftjs img {
+.draftjs .editable-image {
     max-width: 100%;
+    border: 1px solid red;
+    position: relative;
 }
-.draftjs img::after {
+.draftjs .editable-image::after {
     content: attr(src);
 }
 /* style the embedded URLs */
-.draftjs a::after, .draftjs img::after {
+.draftjs a::after, .draftjs .editable-image::after {
     position: absolute;
     top:auto;
     left:0;
