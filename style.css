@@ -1,57 +1,143 @@
-.scrim {
-    border: 0px solid red;
+
+
+.main {
+    border: 1px solid black;
     position: fixed;
-    top:0;
-    bottom:0;
+    bottom: 0;
+    top: 0;
     left: 0;
     right: 0;
-    background-color: rgba(255,255,255,0.7);
-    z-index: 2;
 }
 
 
-
-.dialog {
-    border: 1px solid red;
-    width: 50vw;
-    left: 25vw;
-    top: 15vh;
-    position: absolute;
-    background-color: white;
-    padding: 1em;
-    font-size: 150%;
-}
-
-.dialog h1 {
-    margin:0;
-    font-size: 120%;
-    padding: 1em;
-    background-color: lightgrey;
-    margin-bottom: 1em;
-}
-.dialog .hbox {
+.draftjs {
+    border: 0px solid red;
     margin: 0.5em;
-}
-.dialog input {
-    flex: 2;
-}
-.dialog b {
+    overflow-y: scroll;
+    padding-right: 2em;
     flex: 1;
-    text-align: right;
-    padding-right: 1em;
+    line-height: 200%;
 }
 
-.dialog button {
-    font-size: 100%;
-    background-color: lightgrey;
-    border: 1px solid gray;
+
+.draftjs .header-one, .draftjs .header-two, .draftjs .body, .draftjs figure, .draftjs .code-block {
+    padding: 0.5rem;
+    margin:0;
+    position: relative;
+}
+
+.draftjs .body {
+    border: 1px solid lightgray;
+    border-width: 0px 0px 1px 0px;
+}
+.draftjs .code-block {
+    border: 1px solid darkgoldenrod;
+    font-family: 'Inconsolata', 'Menlo', 'Consolas', monospace;
+    font-size: 90%;
+    padding: 1em;
+    background-color: lightgoldenrodyellow;
+}
+
+.draftjs .header-one, .draftjs .header-two, .draftjs .header-three {
+    font-size: 150%;
+    border: 1px solid lightgray;
+    border-width: 0px 0px 1px 0px;
+}
+.draftjs .header-one   {  font-size: 150%;     }
+.draftjs .header-two   {  font-size: 100%;     }
+.draftjs .header-three {  font-size: 80%;      }
+.draftjs .unordered-list-item {
+    border: 1px solid greenyellow;
+}
+
+.draftjs .header-one:after { content: "header";       }
+.draftjs .body:after       { content: "body";         }
+.draftjs .header-two:after { content: "sub-header";   }
+.draftjs .header-three:after { content: "sub-sub-header";   }
+.draftjs .code-block:after { content: "codeblock";    }
+
+.draftjs .ordered-list-item:after { content: "OL LI"; }
+.draftjs .unordered-list-item:after { content: "UL LI"; }
+
+.draftjs *:after {
+    position: absolute;
+    font-size: 60%;
+    padding: 3px 0 0 0;
+    margin:0;
+    top: 0.5rem;
+    right: -2rem;
+    text-align: right;
+    font-family: sans-serif;
+    color: #aaa;
+    font-variant: normal;
+}
+
+
+.links {
+    min-width: 300px;
+    flex: 0;
+    border: 1px solid green;
+}
+
+
+/* styling for links and images */
+.draftjs a {
+    border: 1px solid red;
+    text-decoration: underline;
+    position: relative;
+}
+.draftjs a::after {
+    content: attr(href);
+}
+.draftjs img {
+    max-width: 100%;
+}
+.draftjs img::after {
+    content: attr(src);
+}
+/* style the embedded URLs */
+.draftjs a::after, .draftjs img::after {
+    position: absolute;
+    top:auto;
+    left:0;
+    right:auto;
+    bottom:-1.3em;
+    margin:0;
+    padding:0;
+    white-space: nowrap;
+    line-height: 100%;
+}
+
+.posts-list {
+    border: 1px solid black;
+    border-width: 0 1px 0 0;
+    min-width: 15em;
+    flex: 0;
+}
+.posts-list ul {
+    padding:0;
+    margin:0;
+}
+.posts-list li {
+    border: 1px solid black;
+    border-width: 0 0 1px 0;
     padding: 0.25em 0.5em;
 }
-
-.dialog .spacer {
-    flex: 1;
+.posts-list li a {
+    font-weight: bold;
+    color: red;
+    cursor: pointer;
 }
 
-.hidden {
-    visibility: hidden;
+
+
+.metadata-editor {
+    border: 1px solid black;
+    border-width: 0 0 0 1px;
+    max-width: 15em;
+}
+.metadata-editor > div {
+    padding: 0.25em;
+}
+.metadata-editor b {
 }
