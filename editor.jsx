@@ -130,6 +130,7 @@ class App extends React.Component {
             urlDialogExistingText:"",
             urlDialogExistingLink:"",
             imageDialogVisible:false,
+            imageDialogEditing:false,
             isNew:false,
         };
         this.onChange = (editorState) => this.setState({editorState});
@@ -267,7 +268,6 @@ class App extends React.Component {
                 var ent2 = Entity.replaceData(key,{url:url});
                 var withoutLink = Modifier.applyEntity(editorState.getCurrentContent(), editorState.getSelection(), key);
                 this.onChange(EditorState.push(editorState, withoutLink, 'apply-entity'));
-                console.log("installed new url", url);
                 return;
             }
             const entityKey = Entity.create('LINK', 'MUTABLE', {url: url});
@@ -279,24 +279,29 @@ class App extends React.Component {
         },100);
     }
 
+    openImageDialogForEditing(block) {
+        this.setState({
+            imageDialogVisible:true,
+            imageDialogEditing:true,
+            imageDialogBlock:block,
+        });
+    }
     mediaBlockRenderer(block) {
         if (block.getType() === 'atomic') {
+            var self = this;
             return {
                 component: Image,
                 editable: false,
                 props: {
-                    onEdit: this.showImageDialog.bind(this)
+                    onEdit: function() {
+                        self.openImageDialogForEditing(block);
+                    }
                 }
             };
         }
         return null;
     }
 
-    showImageDialog() {
-        this.setState({
-            imageDialogVisible:true
-        })
-    }
     cancelImageDialog() {
         this.setState({
             imageDialogVisible:false
@@ -307,17 +312,25 @@ class App extends React.Component {
         this.setState({
             imageDialogVisible:false
         });
-        setTimeout(()=>{
-            var type = 'image';
-            //var src = "http://joshondesign.com/images/69312_IMG_3195.JPG";
-            //var src = "https://www.packtpub.com/sites/default/files/3144_Three.js%20Cookbook.jpg";
-            console.log('adding the src',src);
-            const entityKey = Entity.create(type, 'IMMUTABLE', {src});
-            this.onChange(AtomicBlockUtils.insertAtomicBlock(
-                this.state.editorState,
-                entityKey,
-                ' '
-            ));
+        setTimeout(()=> {
+            if (this.state.imageDialogEditing) {
+                var block = this.state.imageDialogBlock;
+                var key = block.getEntityAt(0);
+                //update the entity
+                var ent2 = Entity.mergeData(key,{src:src});
+                //force a refresh
+                this.onChange(EditorState.forceSelection(this.state.editorState, this.state.editorState.getSelection()));
+                this.setState({
+                    imageDialogEditing: false
+                })
+            } else {
+                const entityKey = Entity.create('image', 'IMMUTABLE', {src});
+                this.onChange(AtomicBlockUtils.insertAtomicBlock(
+                    this.state.editorState,
+                    entityKey,
+                    ' '
+                ));
+            }
         },100);
     }
 
@@ -348,20 +361,10 @@ class App extends React.Component {
         this.toggleBlockType("unordered-list-item");
     }
     addMedia() {
-        this.showImageDialog();
-        /*
-        var type = 'image';
-        //var src = "http://joshondesign.com/images/69312_IMG_3195.JPG";
-        var src = "https://www.packtpub.com/sites/default/files/3144_Three.js%20Cookbook.jpg";
-
-        const entityKey = Entity.create(type, 'IMMUTABLE', {src});
-
-        this.onChange(AtomicBlockUtils.insertAtomicBlock(
-            this.state.editorState,
-            entityKey,
-            ' '
-        ));
-        */
+        this.setState({
+            imageDialogVisible:true,
+            imageDialogEditing:false
+        });
     }
 
 
@@ -547,6 +550,8 @@ class App extends React.Component {
                 />
                 <ImageDialog
                     visible={this.state.imageDialogVisible}
+                    editing={this.state.imageDialogEditing}
+                    block={this.state.imageDialogBlock}
                     onCancel={this.cancelImageDialog.bind(this)}
                     onAction={this.okayImageDialog.bind(this)}
                 />
