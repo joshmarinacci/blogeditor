@@ -1,0 +1,115 @@
+/* reset */
+
+html, body {
+    font-family: 'Helvetica', sans-serif;
+    font-size: 10pt;
+    margin:0;
+    padding:0;
+}
+
+button {
+    border: 1px solid black;
+    background-color: lightgray;
+    padding: 0.25em 0.5em;
+    font-size: 100%;
+    margin: 0.25em;
+}
+button:active {
+    background-color: black;
+    color: white;
+}
+
+
+/* ================== flexbox layouts ================ */
+.hbox {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+}
+.vbox {
+    display: flex;
+    flex-direction: column;
+}
+.grow {
+    flex: 1;
+}
+.scroll {
+    overflow: scroll;
+}
+
+/* =============== toolbar =========== */
+.toolbar {
+    border: 0px solid darkgray;
+    background-color: lightgray;
+    padding: 0;
+}
+.toolbar button {
+    border: 0px solid black;
+    background-color: darkgray;
+    padding: 0.5em;
+    font-size: 100%;
+    margin: 0;
+    border-width: 0px 1px 1px 0px;
+}
+.toolbar button:active {
+    background-color: black;
+}
+
+
+.scrim {
+    border: 0px solid red;
+    position: fixed;
+    top:0;
+    bottom:0;
+    left: 0;
+    right: 0;
+    background-color: rgba(255,255,255,0.7);
+    z-index: 2;
+}
+
+
+
+.dialog {
+    border: 1px solid red;
+    width: 50vw;
+    left: 25vw;
+    top: 15vh;
+    position: absolute;
+    background-color: white;
+    padding: 1em;
+    font-size: 150%;
+}
+
+.dialog h1 {
+    margin:0;
+    font-size: 120%;
+    padding: 1em;
+    background-color: lightgrey;
+    margin-bottom: 1em;
+}
+.dialog .hbox {
+    margin: 0.5em;
+}
+.dialog input {
+    flex: 2;
+}
+.dialog b {
+    flex: 1;
+    text-align: right;
+    padding-right: 1em;
+}
+
+.dialog button {
+    font-size: 100%;
+    background-color: lightgrey;
+    border: 1px solid gray;
+    padding: 0.25em 0.5em;
+}
+
+.dialog .spacer {
+    flex: 1;
+}
+
+.hidden {
+    visibility: hidden;
+}
