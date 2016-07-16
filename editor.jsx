@@ -396,7 +396,7 @@ class App extends React.Component {
         var post = this.state.post;
         post.content = null;
         post.raw = jraw;
-        //post.format = 'jsem';
+        post.format = 'jsem';
         utils.postJSON('/save', post, (res) => {
             console.log("saved with result", res);
             if(this.state.isNew === true) {
