@@ -75,15 +75,6 @@ function myKeyBindingFn(e) {
     return getDefaultKeyBinding(e);
 }
 
-function mediaBlockRenderer(block) {
-    if (block.getType() === 'atomic') {
-        return {
-            component: Image,
-            editable: false
-        };
-    }
-    return null;
-}
 
 const Image = (props) => {
     const entity = Entity.get(props.block.getEntityAt(0));
@@ -92,7 +83,7 @@ const Image = (props) => {
         <img src={src} /><br/>
         <b>{src}</b>
         <br/>
-        <button onClick={(e) => console.log("clicked on a button",e)}>edit</button>
+        <button onClick={props.blockProps.onEdit}>edit</button>
     </div>;
 };
 
@@ -286,6 +277,19 @@ class App extends React.Component {
                 entityKey
             ));
         },100);
+    }
+
+    mediaBlockRenderer(block) {
+        if (block.getType() === 'atomic') {
+            return {
+                component: Image,
+                editable: false,
+                props: {
+                    onEdit: this.showImageDialog.bind(this)
+                }
+            };
+        }
+        return null;
     }
 
     showImageDialog() {
@@ -523,7 +527,7 @@ class App extends React.Component {
                             handleKeyCommand={this.handleKeyCommand.bind(this)}
                             handleReturn={this.handleReturn.bind(this)}
                             blockStyleFn={myBlockStyleFn}
-                            blockRendererFn={mediaBlockRenderer}
+                            blockRendererFn={this.mediaBlockRenderer.bind(this)}
                             customStyleMap={styleMap}
                             ref="editor"
                         />
