@@ -1,4 +1,16 @@
 class MetaEditor extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            tags:[]
+        };
+        if(props.post.tags) {
+            this.state.tags = props.post.tags
+        }
+    }
+    componentWillReceiveProps(props, oldProps) {
+        this.setState({tags: props.post.tags});
+    }
     editSlug() {
         this.props.onFieldChange('slug',this.refs.slug.value);
     }
@@ -8,6 +20,25 @@ class MetaEditor extends React.Component {
     formatDate(ts) {
         return moment.unix(ts).format('ddd MMM Do YYYY');
     }
+
+    fromTags(tags) {
+        return tags.join(", ")
+    }
+    editTags() {
+        var newstr = this.refs.tags.value;
+        this.setState({tags:newstr});
+    }
+    formatTags() {
+        var newtags = this.refs.tags.value
+            .split(",")
+            .map((tag) => {
+                return tag.trim();
+            }).filter((tag)=>{
+                return tag.length >= 1;
+            });
+        this.props.onFieldChange('tags',newtags);
+    }
+
     render() {
         var post = this.props.post;
         return <div className="metadata-editor vbox">
@@ -24,7 +55,15 @@ class MetaEditor extends React.Component {
             <div>date <b>{this.formatDate(post.timestamp)}</b></div>
             <div>format <b>{post.format}</b></div>
             <div>status <b>{post.status}</b></div>
-            <div>tags <b>{post.tags?post.tags.join(", "):""}</b></div>
+            <div>tags
+                <input
+                    ref="tags"
+                    type="text"
+                    value={this.state.tags}
+                    onChange={this.editTags.bind(this)}
+                    onBlur={this.formatTags.bind(this)}
+                />
+            </div>
             <div><button onClick={this.props.onSetDraft}>draft</button>
                 <button onClick={this.props.onSetPublished}>published</button></div>
         </div>
