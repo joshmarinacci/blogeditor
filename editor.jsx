@@ -147,9 +147,9 @@ class App extends React.Component {
         //var blogid = "id_97493558";
         //var blogid = "id_65595712";
         //var blogid = "27fa3339-7119-492f-8f1e-3b6ce528310e";
-        //var blogid = "9525084e-3239-45f8-812c-a8d3eec75cc7";
-        //var blogid = "6dc47cd3-b5d0-44c7-9172-5640fdd225ef";
-        var blogid = "a7900c5d-f19a-48a4-af23-80727aebcbb1";// beautiful lego 2: dark
+        var blogid = "9525084e-3239-45f8-812c-a8d3eec75cc7"; //html table holy grail
+        //var blogid = "6dc47cd3-b5d0-44c7-9172-5640fdd225ef"; //apple watch
+        //var blogid = "a7900c5d-f19a-48a4-af23-80727aebcbb1";// beautiful lego 2: dark
         this.loadPostById(blogid);
     }
     fetchPosts() {
@@ -364,6 +364,16 @@ class App extends React.Component {
         if(command === 'style-link') this.doInlineLink();
         return false;
     }
+    handleReturn(e) {
+        var selection = this.state.editorState.getSelection();
+        var content = this.state.editorState.getCurrentContent();
+        var block = content.getBlockForKey(selection.getAnchorKey());
+        if(block.type == 'code-block') {
+            this.onChange(RichUtils.insertSoftNewline(this.state.editorState));
+            return true;
+        }
+        return false;
+    }
 
     doExport() {
         const content = this.state.editorState.getCurrentContent();
@@ -506,6 +516,7 @@ class App extends React.Component {
                             onChange={this.onChange}
                             keyBindingFn={myKeyBindingFn}
                             handleKeyCommand={this.handleKeyCommand.bind(this)}
+                            handleReturn={this.handleReturn.bind(this)}
                             blockStyleFn={myBlockStyleFn}
                             blockRendererFn={mediaBlockRenderer}
                             customStyleMap={styleMap}
