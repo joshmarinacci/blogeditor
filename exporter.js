@@ -1,3 +1,5 @@
+"use strict"
+
 /**
  * Created by josh on 6/24/16.
  */
@@ -373,3 +375,7 @@ var exporter = {
 console.log("inside the exporter");
 
 
+
+if(typeof module !== 'undefined') {
+    module.exports = exporter;
+}

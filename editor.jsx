@@ -137,6 +137,7 @@ class App extends React.Component {
         this.logState = () => {
             const content = this.state.editorState.getCurrentContent();
             console.log(convertToRaw(content));
+            console.log(JSON.stringify(convertToRaw(content)));
         };
 
         //console.log("fetching from the real blog");
@@ -164,6 +165,7 @@ class App extends React.Component {
         var self = this;
         utils.getJSON("/load?id="+blogid,(post) => {
             console.log("got a post",post);
+            console.log(JSON.stringify(post.raw));
             //fixup for old blogs that have name instead of slug
             if(!post.slug) post.slug = post.name;
             this.setState({post:post });
