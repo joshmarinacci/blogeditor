@@ -40,11 +40,11 @@ function testStyledBlock() {
                     "text": ""
                 },
                 {
-                "type": "span",
-                "style": "emphasis",
-                "meta": {},
-                "content": [{"type": "text", "text": "new document stuff"}]
-            }]
+                    "type": "span",
+                    "style": "emphasis",
+                    "meta": {},
+                    "content": [{"type": "text", "text": "new document stuff"}]
+                }]
         }]
     };
 
@@ -60,9 +60,42 @@ function testStyledBlock() {
         }]
     };
     var jroot2 = exporter.DraftRawToJoshRaw(droot);
-    console.log("result is",JSON.stringify(jroot2,null,'  '));
-    assert.equal(jroot2.content[0].content.length,1,"content of block too long");
+    console.log("result is", JSON.stringify(jroot2, null, '  '));
+    assert.equal(jroot2.content[0].content.length, 1, "content of block too long");
 }
 
+function testOverlappingStyles() {
+    var droot = {
+        "entityMap": {},
+        "blocks": [{
+            "key": "2hjbc",
+            "text": "foo bar baz",
+            "type": "unstyled",
+            "depth": 0,
+            "inlineStyleRanges": [
+                {"offset": 4, "length": 7, "style": "STRONG"},
+                {"offset": 8, "length": 3, "style": "EMPHASIS"}],
+            "entityRanges": []
+        }]
+    };
+    var jroot = {
+        "type": "root",
+        "content": [{
+            "type": "block",
+            "style": "body",
+            "content": [
+                {"type": "text", "text": "foo "},
+                {"type": "span", "style": "strong", "meta": {},
+                    "content": [{"type": "text", "text": "baz"}]
+            },  {"type": "text", "text": "bar "},
+                {"type": "span", "style": "emphasis", "meta": {},
+                    "content": [{"type": "text", "text": "baz"}]
+            }]
+        }]
+    };
+}
+
+
 //testJoshToDraft();
-testStyledBlock();
+//testStyledBlock();
+testOverlappingStyles();

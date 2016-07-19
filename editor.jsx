@@ -372,8 +372,8 @@ class App extends React.Component {
 
     handleKeyCommand(command) {
         console.log("got a command", command);
-        if(command === 'style-bold') this.toggleInline('BOLD');
-        if(command === 'style-italic') this.toggleInline('ITALIC');
+        if(command === 'style-bold') this.toggleInline('STRONG');
+        if(command === 'style-italic') this.toggleInline('EMPHASIS');
         if(command === 'style-code') this.toggleInline('CODE');
         if(command === 'style-link') this.doInlineLink();
         return false;
@@ -394,6 +394,7 @@ class App extends React.Component {
         var draw = convertToRaw(content);
         var jraw = exporter.DraftRawToJoshRaw(draw);
         console.log("jraw = ", jraw);
+        console.log(JSON.stringify(jraw));
         //var draw2 = exporter.JoshRawToDraftRaw(jraw);
         //this.onChange(EditorState.createWithContent(convertFromRaw(draw2), this.decorator));
     }
