@@ -13,8 +13,15 @@ function testJoshToDraft() {
                 style: 'body',
                 content: [
                     {
-                        type: 'text',
-                        text: 'some cool text'
+                        type:'span',
+                        style:'plain',
+                        meta:{},
+                        content:[
+                            {
+                                type: 'text',
+                                text: 'some cool text'
+                            }
+                        ]
                     }
                 ]
             }
@@ -25,6 +32,7 @@ function testJoshToDraft() {
     console.log("draft is", draft);
     var josh2 = exporter.DraftRawToJoshRaw(draft);
     console.log("josh2 is", josh2);
+    console.log(JSON.stringify(josh2));
     assert.deepEqual(josh2, josh, 'basic conversion failed');
 }
 
@@ -65,6 +73,7 @@ function testStyledBlock() {
 }
 
 function testOverlappingStyles() {
+    //currently jraw gets confused and duplicates content
     var droot = {
         "entityMap": {},
         "blocks": [{
@@ -85,17 +94,90 @@ function testOverlappingStyles() {
             "style": "body",
             "content": [
                 {"type": "text", "text": "foo "},
-                {"type": "span", "style": "strong", "meta": {},
+                {
+                    "type": "span", "style": "strong", "meta": {},
                     "content": [{"type": "text", "text": "baz"}]
-            },  {"type": "text", "text": "bar "},
-                {"type": "span", "style": "emphasis", "meta": {},
+                }, {"type": "text", "text": "bar "},
+                {
+                    "type": "span", "style": "emphasis", "meta": {},
                     "content": [{"type": "text", "text": "baz"}]
-            }]
+                }]
         }]
     };
 }
 
+function testOverlappingStyles2() {
 
-//testJoshToDraft();
-//testStyledBlock();
-testOverlappingStyles();
+    var droot = {
+        "entityMap": {},
+        "blocks": [{
+            "key": "5k69q",
+            "text": "foo bar baz",
+            "type": "unstyled",
+            "depth": 0,
+            "inlineStyleRanges": [
+                {"offset": 0, "length": 11, "style": "STRONG"},
+                {"offset": 4, "length": 3, "style": "EMPHASIS"}],
+            "entityRanges": []
+        }]
+    };
+
+    var jroot = {
+        "type": "root",
+        "content": [
+            {
+                "type": "block",
+                "style": "body",
+                "content": [
+                    {
+                        type: 'span',
+                        style: 'plain',
+                        meta: {},
+                        content: [
+                            {
+                                type:'text',
+                                text:''
+                            },
+                            {
+                                "type": "span",
+                                "style": "strong",
+                                "meta": {},
+                                "content": [
+                                    {
+                                        "type": "text",
+                                        "text": "foo "
+                                    },
+                                    {
+                                        "type": "span",
+                                        "style": "emphasis",
+                                        meta:{},
+                                        content: [
+                                            {
+                                                "type": "text",
+                                                "text": "bar"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "type": "text",
+                                        "text": " baz"
+                                    },
+                                ]
+                            },
+                        ]
+                    },
+                ]
+            }
+        ]
+    };
+
+    var jroot2 = exporter.DraftRawToJoshRaw(droot);
+    console.log(JSON.stringify(jroot2, null, '   '));
+    assert.deepEqual(jroot2, jroot, 'overlapping styles are broken');
+}
+
+
+testJoshToDraft();
+testStyledBlock();
+//testOverlappingStyles();
+testOverlappingStyles2();
