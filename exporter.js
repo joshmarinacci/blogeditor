@@ -214,12 +214,15 @@ var exporter = {
 
 
     d2j_block: function(bin, entityMap) {
+        //create a basic block
         var bout = {
             type:'block',
             style:'body',
             content:[]
         };
+        //if the block type matches a known Josh  style, use it
         if(d2j_block_map[bin.type]) bout.style = d2j_block_map[bin.type];
+        //if atomic block, turn into image and return early
         if(bin.type == 'atomic') {
             let image_entity = entityMap[bin.entityRanges[0].key];
             console.log("saving with image src = ", image_entity.data.src);
@@ -234,18 +237,30 @@ var exporter = {
                 }]
             };
         }
+
+        //make a chunk
         var chunk = {
             type:'text',
             text:""
         };
 
+        function addChunkToContent(chunk) {
+            if(chunk.type == 'text' && chunk.text == "") {
+                console.log("It's an empty text chunk. skip it");
+                return;
+            }
+            bout.content.push(chunk);
+        }
+
         var stack = [];
         for(var i=0; i<bin.text.length; i++) {
             var ch = bin.text[i];
             var r = styleChange(bin,i);
+            //if a style change
             if(r.found) {
                 if(r.start) {
-                    bout.content.push(chunk);
+                    //bout.content.push(chunk);
+                    addChunkToContent(chunk);
                     var span = {
                         type:'span',
                         style:'plain',
@@ -262,7 +277,7 @@ var exporter = {
                             span.meta.href = ent.data.url;
                         }
                     }
-                    bout.content.push(span);
+                    addChunkToContent(span);
                     stack.push(span);
                     chunk = {
                         type:'text',
@@ -301,74 +316,7 @@ var exporter = {
             content:blocks
         }
         return bkx;
-    },
-    runTests: function(theComp) {
-        this.test1(theComp, () => {
-            this.test2(theComp);
-        });
-    },
-
-    test1: function(theComp, cb) {
-        var jraw1 = {
-            type:'root',
-            content:[
-                {
-                    type:'block',
-                    style:'body',
-                    content:[
-                        {
-                            type:'text',
-                            text:'some cool text'
-                        }
-                    ]
-                }
-            ]
-        };
-        this.compare(jraw1, theComp, cb);
-    },
-    test2: function(theComp, cb) {
-        var jraw1 = {
-            type:'root',
-            content:[
-                {
-                    type:'block',
-                    style:'body',
-                    content:[
-                        {
-                            type:'span',
-                            style:'link',
-                            meta: {
-                                href:'http://www.google.com/'
-                            },
-                            content:[
-                                {
-                                    type:'text',
-                                    text:'some cool text'
-                                }
-                            ]
-                        }
-                    ]
-                }
-            ]
-        };
-        this.compare(jraw1, theComp, cb);
-    },
-
-    compare: function(jraw1, theComp, cb) {
-        var diff = DeepDiff.noConflict();
-        var draw1 = exporter.JoshRawToDraftRaw(jraw1);
-        var dcooked1 = convertFromRaw(draw1);
-        theComp.loadContent(dcooked1);
-        setTimeout(function() {
-            const dcooked2 = theComp.state.editorState.getCurrentContent();
-            var draw2 = convertToRaw(dcooked2);
-            var jraw2 = exporter.DraftRawToJoshRaw(draw2);
-            console.log("jraw2 = ", jraw2);
-            console.log("diff = ", diff(jraw1, jraw2));
-            if(cb) cb();
-        },100);
     }
-
 };
 
 
