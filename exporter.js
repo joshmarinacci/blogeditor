@@ -1,3 +1,5 @@
+"use strict"
+
 /**
  * Created by josh on 6/24/16.
  */
@@ -212,12 +214,15 @@ var exporter = {
 
 
     d2j_block: function(bin, entityMap) {
+        //create a basic block
         var bout = {
             type:'block',
             style:'body',
             content:[]
         };
+        //if the block type matches a known Josh  style, use it
         if(d2j_block_map[bin.type]) bout.style = d2j_block_map[bin.type];
+        //if atomic block, turn into image and return early
         if(bin.type == 'atomic') {
             let image_entity = entityMap[bin.entityRanges[0].key];
             console.log("saving with image src = ", image_entity.data.src);
@@ -232,144 +237,105 @@ var exporter = {
                 }]
             };
         }
+
+        //make a chunk
         var chunk = {
             type:'text',
             text:""
         };
 
-        var stack = [];
-        for(var i=0; i<bin.text.length; i++) {
-            var ch = bin.text[i];
-            var r = styleChange(bin,i);
-            if(r.found) {
-                if(r.start) {
-                    bout.content.push(chunk);
-                    var span = {
-                        type:'span',
-                        style:'plain',
-                        meta:{},
-                        content:[]
-                    };
-                    if(typeof r.range.style !== 'undefined') {
-                        if(d2j_style_map[r.range.style]) span.style = d2j_style_map[r.range.style];
-                    }
-                    if(typeof r.range.key !== 'undefined') {
-                        var ent = entityMap[r.range.key];
-                        if(d2j_entity_map[ent.type]) {
-                            span.style = d2j_entity_map[ent.type];
-                            span.meta.href = ent.data.url;
-                        }
-                    }
-                    bout.content.push(span);
-                    stack.push(span);
-                    chunk = {
-                        type:'text',
-                        text:ch
-                    }
-                } else {
-                    var span = stack.pop();
-                    span.content.push(chunk);
-                    chunk = {
-                        type:'text',
-                        text:ch
-                    }
-                }
-            } else {
-                chunk.text += ch;
-            }
-        }
 
-        if(stack.length > 0) {
-            while(stack.length > 0) {
-                var span = stack.pop();
-                span.content.push(chunk);
-            }
-        } else {
-            bout.content.push(chunk);
-        }
-        return bout;
+        return processStyledBlock(bin, entityMap);
     },
     DraftRawToJoshRaw: function(blob) {
-
-        console.log("doing an export");
-        console.log("blob = ",blob);
         var blocks = blob.blocks.map((block) => exporter.d2j_block(block,blob.entityMap));
         var bkx = {
             type:'root',
             content:blocks
         }
         return bkx;
-    },
-    runTests: function(theComp) {
-        this.test1(theComp, () => {
-            this.test2(theComp);
-        });
-    },
-
-    test1: function(theComp, cb) {
-        var jraw1 = {
-            type:'root',
-            content:[
-                {
-                    type:'block',
-                    style:'body',
-                    content:[
-                        {
-                            type:'text',
-                            text:'some cool text'
-                        }
-                    ]
-                }
-            ]
-        };
-        this.compare(jraw1, theComp, cb);
-    },
-    test2: function(theComp, cb) {
-        var jraw1 = {
-            type:'root',
-            content:[
-                {
-                    type:'block',
-                    style:'body',
-                    content:[
-                        {
-                            type:'span',
-                            style:'link',
-                            meta: {
-                                href:'http://www.google.com/'
-                            },
-                            content:[
-                                {
-                                    type:'text',
-                                    text:'some cool text'
-                                }
-                            ]
-                        }
-                    ]
-                }
-            ]
-        };
-        this.compare(jraw1, theComp, cb);
-    },
-
-    compare: function(jraw1, theComp, cb) {
-        var diff = DeepDiff.noConflict();
-        var draw1 = exporter.JoshRawToDraftRaw(jraw1);
-        var dcooked1 = convertFromRaw(draw1);
-        theComp.loadContent(dcooked1);
-        setTimeout(function() {
-            const dcooked2 = theComp.state.editorState.getCurrentContent();
-            var draw2 = convertToRaw(dcooked2);
-            var jraw2 = exporter.DraftRawToJoshRaw(draw2);
-            console.log("jraw2 = ", jraw2);
-            console.log("diff = ", diff(jraw1, jraw2));
-            if(cb) cb();
-        },100);
     }
-
 };
 
+function processStyledBlock(bin, entityMap) {
+    var block = {
+        type:'block',
+        style:'body',
+        content:[]
+    };
+    var chunk = {
+        type:'text',
+        text:''
+    };
+    var span = {
+        type:'span',
+        style:'plain',
+        meta:{},
+        content:[]
+    };
+    block.content.push(span);
+    span.content.push(chunk);
+
+    var stack = [];
+    stack.peek = function() {
+        return this[this.length-1];
+    };
+    stack.push(span);
+    for(var i=0; i<bin.text.length; i++) {
+        var ch = bin.text[i];
+        var r = styleChange(bin,i);
+        //if a style change
+        if(r.found) {
+            if(r.start) {
+                var sp2 = { type:'span', style:'plain', meta:{}, content:[]};
+                if(typeof r.range.style !== 'undefined') {
+                    if(d2j_style_map[r.range.style]) sp2.style = d2j_style_map[r.range.style];
+                }
+                if(typeof r.range.key !== 'undefined') {
+                    var ent = entityMap[r.range.key];
+                    if(d2j_entity_map[ent.type]) {
+                        sp2.style = d2j_entity_map[ent.type];
+                        sp2.meta.href = ent.data.url;
+                    }
+                }
+                var spp = stack.peek();
+                spp.content.push(sp2);
+                stack.push(sp2);
+                chunk = makeChunk();
+                sp2.content.push(chunk);
+                chunk.text += ch;
+            } else {
+                var sp2 = stack.pop();
+                chunk = makeChunk();
+                stack.peek().content.push(chunk);
+                chunk.text += ch;
+            }
+        } else {
+            chunk.text += ch;
+        }
+    }
+    /*
+    make an initial chunk, put into the block
+    for each letter index in the block
+        find the style changes at this index
+        if start a new style
+            add a span to the block
+            make a new chunk in the span
+        add text to current chunk
+
+     */
+    if(d2j_block_map[bin.type]) block.style = d2j_block_map[bin.type];
+    return block;
+}
+
+function makeChunk() {
+    return { type:'text', text:''};
+}
 
 console.log("inside the exporter");
 
 
+
+if(typeof module !== 'undefined') {
+    module.exports = exporter;
+}
