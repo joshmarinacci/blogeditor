@@ -260,9 +260,6 @@ class App extends React.Component {
     loadContent(cont) {
         this.onChange(EditorState.createWithContent(cont, this.decorator));
     }
-    componentDidMount() {
-       //exporter.runTests(this);
-    }
 
     toggleBlockType(blockType) {
         //console.log("invoking toggle block type", this, JSON.stringify(blockType));
@@ -281,9 +278,7 @@ class App extends React.Component {
                 style)
         )
     }
-    doInlineLink() {
-        this.showUrlDialog();
-    }
+
     showUrlDialog() {
         //find link under the cursor
         var res = scanForLink(this.state.editorState);
@@ -380,10 +375,6 @@ class App extends React.Component {
         },100);
     }
 
-    doLink(e) {
-        this.showUrlDialog();
-    }
-
     setH1() {
         this.toggleBlockType('header-one');
     }
@@ -419,7 +410,7 @@ class App extends React.Component {
         if(command === 'style-bold') this.toggleInline('BOLD');
         if(command === 'style-italic') this.toggleInline('ITALIC');
         if(command === 'style-code') this.toggleInline('CODE');
-        if(command === 'style-link') this.doInlineLink();
+        if(command === 'style-link') this.showUrlDialog();
         return false;
     }
     handleReturn(e) {
@@ -558,7 +549,7 @@ class App extends React.Component {
                     <button onClick={this.setOrderedList.bind(this)}>OL</button>
                     <button onClick={this.setUnorderedList.bind(this)}>UL</button>
                     <button onClick={this.addMedia.bind(this)}>image</button>
-                    <button onClick={this.doLink.bind(this)}>link</button>
+                    <button onClick={this.showUrlDialog.bind(this)}>link</button>
                     <button onClick={this.doExport.bind(this)}>export</button>
                     <button onClick={this.doDiff.bind(this)}>diff</button>
                     <button onClick={this.doSave.bind(this)}>save</button>
