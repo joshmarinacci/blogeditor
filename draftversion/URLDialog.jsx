@@ -22,6 +22,18 @@ class URLDialog extends React.Component {
             url:this.refs.urlText.value
         })
     }
+    onKeyDown(e) {
+        if(e.keyCode == utils.KEYCODES.ENTER) {
+            e.stopPropagation();
+            e.preventDefault();
+            this.okay();
+        }
+        if(e.keyCode == utils.KEYCODES.ESCAPE) {
+            e.stopPropagation();
+            e.preventDefault();
+            this.cancel();
+        }
+    }
     cancel() {
         this.props.onCancel();
     }
@@ -37,7 +49,9 @@ class URLDialog extends React.Component {
                     <input type="text" value={this.state.text}/></div>
                 <div className="hbox">
                     <b>link</b>
-                    <input type="text" ref="urlText" value={this.state.url} onChange={this.editLink.bind(this)}/></div>
+                    <input type="text" ref="urlText" value={this.state.url} onChange={this.editLink.bind(this)}
+                           onKeyDown={this.onKeyDown.bind(this)}
+                    /></div>
                 <div className="hbox">
                     <span className="spacer"></span>
                     <button onClick={this.cancel.bind(this)}>Cancel</button>
