@@ -43,19 +43,21 @@ class URLDialog extends React.Component {
     render() {
         return <div className={"scrim " + (this.props.visible?"":"hidden")}>
             <div className="dialog url-dialog vbox">
-                <h1>Edit URL</h1>
-                <div className="hbox">
-                    <b>text</b>
-                    <input type="text" value={this.state.text}/></div>
-                <div className="hbox">
-                    <b>link</b>
-                    <input type="text" ref="urlText" value={this.state.url} onChange={this.editLink.bind(this)}
-                           onKeyDown={this.onKeyDown.bind(this)}
-                    /></div>
-                <div className="hbox">
-                    <span className="spacer"></span>
+                <header>Edit URL</header>
+                <div className="content grow">
+                    <div className="hbox">
+                        <b>text</b>
+                        <input type="text" value={this.state.text}/></div>
+                    <div className="hbox">
+                        <b>link</b>
+                        <input type="text" ref="urlText" value={this.state.url} onChange={this.editLink.bind(this)}
+                               onKeyDown={this.onKeyDown.bind(this)}
+                        /></div>
+                </div>
+                <footer className="children-right">
                     <button onClick={this.cancel.bind(this)}>Cancel</button>
-                    <button onClick={this.okay.bind(this)}>Okay</button></div>
+                    <button className='default' onClick={this.okay.bind(this)}>Okay</button>
+                    </footer>
             </div>
         </div>
     }

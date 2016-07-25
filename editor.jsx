@@ -541,7 +541,7 @@ class App extends React.Component {
     }
 
     render() {
-        return (<div className="main vbox">
+        return (<div className="fill vbox">
                 <div className="toolbar">
                     <button onClick={this.logState}>log state</button>
                     <button onClick={this.setH1.bind(this)}>H1</button>

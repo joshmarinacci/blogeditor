@@ -6,6 +6,7 @@
     "build": "webpack --progress --colors"
   },
   "dependencies": {
+    "appy-style": "0.0.3",
     "babel-core": "^6.10.4",
     "babel-standalone": "^6.10.3",
     "deep-diff": "^0.3.4",
