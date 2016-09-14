@@ -3,6 +3,10 @@
  */
 var utils = {
     BASE_URL: 'http://joshondesign.com:39865',
+    KEYCODES: {
+        ESCAPE:27,
+        ENTER:13,
+    },
     getJSON: function(url,cb) {
         var url = this.BASE_URL+url;
         console.log("loading posts from",url);

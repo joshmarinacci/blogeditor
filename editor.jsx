@@ -109,6 +109,76 @@ const Link = (props) => {
     );
 };
 
+
+class DraftUtils extends React.Component {
+}
+
+function findEntityText(block, key) {
+    var ftext = "";
+    block.findEntityRanges(
+        (character) => {
+            const entityKey = character.getEntity();
+            return (entityKey == key);
+        },
+        (start,end) => {
+            ftext = block.getText().slice(start,end);
+        }
+    );
+    return ftext;
+}
+
+function scanForLink(editorState) {
+    var selection = editorState.getSelection();
+    var anchorKey = selection.getAnchorKey();
+    var block = editorState.getCurrentContent().getBlockForKey(anchorKey);
+    var start = selection.getStartOffset();
+    var end = selection.getEndOffset();
+    if(selection.isCollapsed()) {
+        //look for entities that the cursor point is in
+        var substring = block.getCharacterList().slice(start,start+1);
+        var entityKey = substring.get(0).getEntity();
+        if(entityKey && Entity.get(entityKey).getType() === 'LINK') {
+            return {
+                found:true,
+                text:findEntityText(block,entityKey),
+                url:Entity.get(entityKey).getData().url,
+                key:entityKey
+            }
+        } else {
+            return {
+                found:false,
+                text:"",
+                url:"",
+                key:-1
+            }
+        }
+    } else {
+        //look for entities that overlap with the selection area
+        var substring = block.getCharacterList().slice(start,end);
+        //find the first entity that intersects with the selected text
+        var char = substring.find((v) => {
+            var key = v.getEntity();
+            return key && Entity.get(key).getType() === 'LINK';
+        });
+        if(char) {
+            var entityKey = char.getEntity();
+            return {
+                found:true,
+                text:findEntityText(block, entityKey),
+                url:Entity.get(entityKey).getData().url,
+                key:entityKey
+            }
+        } else {
+            return {
+                found:false,
+                text: block.text.substring(start,end),
+                url:"",
+                key:-1
+            }
+        }
+    }
+}
+
 class App extends React.Component {
     constructor(props) {
         super(props);
@@ -127,11 +197,14 @@ class App extends React.Component {
                 slug:'slug'
             },
             urlDialogVisible:false,
-            urlDialogExistingText:"",
-            urlDialogExistingLink:"",
+            urlDialogLink:{
+                found:false,
+                text:"",
+                url:""
+            },
             imageDialogVisible:false,
             imageDialogEditing:false,
-            isNew:false,
+            isNew:false
         };
         this.onChange = (editorState) => this.setState({editorState});
         this.logState = () => {
@@ -189,9 +262,6 @@ class App extends React.Component {
     loadContent(cont) {
         this.onChange(EditorState.createWithContent(cont, this.decorator));
     }
-    componentDidMount() {
-       //exporter.runTests(this);
-    }
 
     toggleBlockType(blockType) {
         //console.log("invoking toggle block type", this, JSON.stringify(blockType));
@@ -210,48 +280,19 @@ class App extends React.Component {
                 style)
         )
     }
-    doInlineLink() {
-        this.showUrlDialog();
-    }
-    getSelectedLinkKey() {
-        var selection = this.state.editorState.getSelection();
-        var content = this.state.editorState.getCurrentContent();
-        var block = content.getBlockForKey(selection.getAnchorKey());
-        var chars = block.getCharacterList().slice(selection.getStartOffset(), selection.getEndOffset());
-        var entityKey = null;
-        chars.some((v) => {
-            entityKey = v.getEntity();
-        });
-        var text = block.getText().slice(selection.getStartOffset(), selection.getEndOffset());
 
-        var ftext = "";
-        block.findEntityRanges(
-            (character) => {
-                const entityKey = character.getEntity();
-                return (entityKey !== null && Entity.get(entityKey).getType() === 'LINK');
-            },
-            (start,end) => {
-                ftext = block.getText().slice(start,end);
-            }
-        );
-        return {key:entityKey, text:ftext, url:Entity.get(entityKey).getData().url};
-    }
     showUrlDialog() {
         //find link under the cursor
-        if(RichUtils.currentBlockContainsLink(this.state.editorState)) {
-            var ret = this.getSelectedLinkKey();
+        var res = scanForLink(this.state.editorState);
+        if(res.found) {
             this.setState({
-                urlDialogVisible:true,
-                urlDialogExistingLink:ret.url,
-                urlDialogExistingText:ret.text,
-                urlDialogUpdateExisting:true
+                urlDialogVisible: true,
+                urlDialogLink:res
             });
         } else {
             this.setState({
                 urlDialogVisible: true,
-                urlDialogExistingLink: "",
-                urlDialogExistingText: "",
-                urlDialogUpdateExisting: false
+                urlDialogLink: res
             });
         }
     }
@@ -264,9 +305,9 @@ class App extends React.Component {
         this.refs.editor.focus();
         //have to do this part later, after the focus change, so the selection will be valid
         setTimeout(()=>{
-            if(this.state.urlDialogUpdateExisting === true) {
-                var editorState = this.state.editorState;
-                var key = this.getSelectedLinkKey();
+            if(this.state.urlDialogLink.found) {
+                                var editorState = this.state.editorState;
+                var key = this.state.urlDialogLink.key;
                 var ent2 = Entity.replaceData(key,{url:url});
                 var withoutLink = Modifier.applyEntity(editorState.getCurrentContent(), editorState.getSelection(), key);
                 this.onChange(EditorState.push(editorState, withoutLink, 'apply-entity'));
@@ -336,10 +377,6 @@ class App extends React.Component {
         },100);
     }
 
-    doLink(e) {
-        this.showUrlDialog();
-    }
-
     setH1() {
         this.toggleBlockType('header-one');
     }
@@ -375,7 +412,7 @@ class App extends React.Component {
         if(command === 'style-bold') this.toggleInline('STRONG');
         if(command === 'style-italic') this.toggleInline('EMPHASIS');
         if(command === 'style-code') this.toggleInline('CODE');
-        if(command === 'style-link') this.doInlineLink();
+        if(command === 'style-link') this.showUrlDialog();
         return false;
     }
     handleReturn(e) {
@@ -504,7 +541,7 @@ class App extends React.Component {
     }
 
     render() {
-        return (<div className="main vbox">
+        return (<div className="fill vbox">
                 <div className="toolbar">
                     <button onClick={this.logState}>log state</button>
                     <button onClick={this.setH1.bind(this)}>H1</button>
@@ -515,7 +552,7 @@ class App extends React.Component {
                     <button onClick={this.setOrderedList.bind(this)}>OL</button>
                     <button onClick={this.setUnorderedList.bind(this)}>UL</button>
                     <button onClick={this.addMedia.bind(this)}>image</button>
-                    <button onClick={this.doLink.bind(this)}>link</button>
+                    <button onClick={this.showUrlDialog.bind(this)}>link</button>
                     <button onClick={this.doExport.bind(this)}>export</button>
                     <button onClick={this.doDiff.bind(this)}>diff</button>
                     <button onClick={this.doSave.bind(this)}>save</button>
@@ -546,8 +583,7 @@ class App extends React.Component {
                 </div>
                 <URLDialog
                     visible={this.state.urlDialogVisible}
-                    link={this.state.urlDialogExistingLink}
-                    text={this.state.urlDialogExistingText}
+                    link={this.state.urlDialogLink}
                     onCancel={this.cancelUrlDialog.bind(this)}
                     onAction={this.okayUrlDialog.bind(this)}
                 />
